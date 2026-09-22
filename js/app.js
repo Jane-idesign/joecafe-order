@@ -123,7 +123,7 @@
           });
         }
       });
-    }, { rootMargin: "-140px 0px -70% 0px", threshold: 0 });
+    }, { rootMargin: "-80px 0px -70% 0px", threshold: 0 });
     document.querySelectorAll(".cat").forEach(function (s) { io.observe(s); });
   }
 
@@ -151,12 +151,13 @@
   // ---------- steps ----------
   function goStep(n) {
     state.step = n;
+    document.body.dataset.step = n;
     $("#viewMenu").hidden = n !== 1;
     $("#viewReview").hidden = n !== 2;
     $("#viewDone").hidden = n !== 3;
     $("#catTabs").hidden = n !== 1;
     $("#backBtn").hidden = n !== 2;
-    $("#pageTitle").textContent = n === 1 ? "夏天的尾巴我來了！" : n === 2 ? "確認餐點" : "完成";
+    $("#pageTitle").textContent = n === 1 ? "夏天的尾巴我來了！" : n === 2 ? "確認餐點" : "訂餐完成";
     if (n === 2) renderReview();
     renderBottomBar();
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
@@ -246,89 +247,101 @@
   }
 
   // ---------- card drawing ----------
+  var oceanImg = null;
+  function loadOcean() {
+    return new Promise(function (resolve) {
+      if (oceanImg) return resolve(oceanImg);
+      var im = new Image();
+      im.onload = function () { oceanImg = im; resolve(im); };
+      im.onerror = function () { resolve(null); };
+      im.src = "img/ocean.jpg";
+    });
+  }
   function drawCard(order) {
     var ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    return ready.then(function () {
+    return Promise.all([ready, loadOcean()]).then(function (res) {
+      var ocean = res[1];
       var W = 1080, pad = 84;
-      var lineH = 76;
-      var headH = 300;
-      var listH = order.items.length * lineH + 40;
-      var H = headH + listH + 260;
+      var lineH = 78;
+      var heroH = 520;
+      var listH = order.items.length * lineH;
+      var H = heroH + 150 + listH + 230;
       var canvas = $("#cardCanvas");
       canvas.width = W; canvas.height = H;
       var ctx = canvas.getContext("2d");
-      var sans = '"Montserrat", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
-      var AQUA = "#47c9db", AQUA_DEEP = "#2fb3c6", INK = "#232323", MUTED = "#8a9a9c", LINE = "#e4f0f1";
+      var sans = '"Jost", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
+      var INK = "#151515", MUTED = "#8a8f94", LINE = "#ececec", SEA = "#1b6a99";
 
-      // background: pale aqua with soft white glow
-      ctx.fillStyle = "#e6f8fa"; ctx.fillRect(0, 0, W, H);
-      var g = ctx.createRadialGradient(W - 120, 80, 0, W - 120, 80, 420);
-      g.addColorStop(0, "rgba(255,255,255,0.95)"); g.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      var g2 = ctx.createRadialGradient(80, H - 120, 0, 80, H - 120, 360);
-      g2.addColorStop(0, "rgba(255,255,255,0.8)"); g2.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
-
-      // header: small aqua label + family name
-      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-      ctx.fillStyle = AQUA; ctx.font = "500 24px " + sans; ctx.letterSpacing = "6px";
-      ctx.fillText("淺水灣小聚 · 訂餐小卡", W / 2, 118);
+      // hero: ocean photo
+      ctx.fillStyle = "#1b6a99"; ctx.fillRect(0, 0, W, heroH + 60);
+      if (ocean) {
+        var sc = Math.max(W / ocean.width, (heroH + 60) / ocean.height);
+        var sw = W / sc, sh = (heroH + 60) / sc;
+        ctx.drawImage(ocean, (ocean.width - sw) / 2, (ocean.height - sh) * 0.35, sw, sh, 0, 0, W, heroH + 60);
+      }
+      var shade = ctx.createLinearGradient(0, 0, 0, heroH);
+      shade.addColorStop(0, "rgba(0,20,40,0.35)"); shade.addColorStop(0.6, "rgba(0,20,40,0)");
+      ctx.fillStyle = shade; ctx.fillRect(0, 0, W, heroH);
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.font = "400 26px " + sans; ctx.letterSpacing = "6px";
+      ctx.fillText("淺水灣小聚 · 訂餐小卡", pad, 120);
       ctx.letterSpacing = "0px";
-      ctx.fillStyle = INK; ctx.font = "600 " + fitFont(ctx, order.family, W - 220, 88, 52, sans) + "px " + sans;
-      ctx.fillText(order.family, W / 2, 218);
-      // thin aqua underline
-      ctx.strokeStyle = AQUA; ctx.lineWidth = 3; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(W / 2 - 40, 252); ctx.lineTo(W / 2 + 40, 252); ctx.stroke();
+      ctx.fillStyle = "#ffffff"; ctx.font = "300 " + fitFont(ctx, order.family, W - pad * 2, 110, 56, sans, "300") + "px " + sans;
+      ctx.fillText(order.family, pad - 4, 300);
 
-      // list card (white, soft shadow)
-      var top = headH;
-      roundRect(ctx, 48, top - 20, W - 96, listH + 150, 44);
-      ctx.fillStyle = "#ffffff"; ctx.shadowColor = "rgba(71,201,219,0.28)"; ctx.shadowBlur = 48; ctx.shadowOffsetY = 18; ctx.fill();
-      ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      // white sheet with rounded top corners
+      var top = heroH;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.moveTo(0, top + 44); ctx.arcTo(0, top, 44, top, 44); ctx.lineTo(W - 44, top); ctx.arcTo(W, top, W, top + 44, 44); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
 
-      ctx.textAlign = "left"; ctx.textBaseline = "middle";
-      var yy = top + 40;
+      ctx.fillStyle = INK; ctx.font = "400 30px " + sans; ctx.letterSpacing = "2px";
+      ctx.fillText("餐點明細", pad, top + 96);
+      ctx.letterSpacing = "0px";
+      // wavy underline
+      drawWave(ctx, pad, top + 112, 120, SEA);
+
+      ctx.textBaseline = "middle";
+      var yy = top + 150 + lineH / 2;
       order.items.forEach(function (it, i) {
-        if (i > 0) { ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, yy - lineH / 2 + 4); ctx.lineTo(W - pad, yy - lineH / 2 + 4); ctx.stroke(); }
-        ctx.fillStyle = AQUA; ctx.beginPath(); ctx.arc(pad + 8, yy, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = INK; ctx.font = "500 34px " + sans;
-        ctx.fillText(truncate(ctx, it.name, W - pad * 2 - 260), pad + 34, yy);
-        // qty pill (outlined)
-        var pill = "× " + it.qty;
-        ctx.font = "600 28px " + sans;
-        var pw = ctx.measureText(pill).width + 40;
-        roundRect(ctx, W - pad - 140 - pw, yy - 25, pw, 50, 25);
-        ctx.fillStyle = "#e6f8fa"; ctx.fill();
-        ctx.fillStyle = AQUA_DEEP; ctx.textAlign = "center"; ctx.fillText(pill, W - pad - 140 - pw / 2, yy + 1);
-        // subtotal
-        ctx.textAlign = "right"; ctx.fillStyle = MUTED; ctx.font = "400 28px " + sans;
+        if (i > 0) { ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, yy - lineH / 2); ctx.lineTo(W - pad, yy - lineH / 2); ctx.stroke(); }
+        ctx.textAlign = "left"; ctx.fillStyle = INK; ctx.font = "400 34px " + sans;
+        ctx.fillText(truncate(ctx, it.name, W - pad * 2 - 300), pad, yy);
+        ctx.textAlign = "center"; ctx.fillStyle = INK; ctx.font = "300 34px " + sans;
+        ctx.fillText("×" + it.qty, W - pad - 190, yy);
+        ctx.textAlign = "right"; ctx.fillStyle = MUTED; ctx.font = "300 30px " + sans;
         ctx.fillText(money(it.price * it.qty), W - pad, yy);
-        ctx.textAlign = "left";
         yy += lineH;
       });
 
       // total
-      var ty = top + listH + 60;
-      ctx.strokeStyle = "#c1d8d9"; ctx.lineWidth = 2; ctx.setLineDash([2, 10]); ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(pad, ty - 40); ctx.lineTo(W - pad, ty - 40); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = MUTED; ctx.font = "500 28px " + sans; ctx.fillText("共 " + order.items.reduce(function (s, i) { return s + i.qty; }, 0) + " 項", pad, ty + 10);
-      ctx.textAlign = "right"; ctx.fillStyle = INK; ctx.font = "600 52px " + sans; ctx.fillText(money(order.total), W - pad, ty + 10);
+      var ty = top + 150 + listH + 70;
+      ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, ty - 50); ctx.lineTo(W - pad, ty - 50); ctx.stroke();
+      ctx.textAlign = "left"; ctx.fillStyle = MUTED; ctx.font = "300 28px " + sans;
+      ctx.fillText("共 " + order.items.reduce(function (s, i) { return s + i.qty; }, 0) + " 項", pad, ty + 8);
+      ctx.textAlign = "right"; ctx.fillStyle = INK; ctx.font = "300 60px " + sans; ctx.fillText(money(order.total), W - pad, ty + 8);
 
       // footer
-      ctx.textAlign = "center"; ctx.fillStyle = MUTED; ctx.font = "400 22px " + sans; ctx.letterSpacing = "3px";
-      ctx.fillText(CONFIG.CARD_FOOTER || MENU.store, W / 2, H - 60);
+      ctx.textAlign = "center"; ctx.fillStyle = MUTED; ctx.font = "300 22px " + sans; ctx.letterSpacing = "4px";
+      ctx.fillText(CONFIG.CARD_FOOTER || MENU.store, W / 2, H - 56);
       ctx.letterSpacing = "0px";
 
       return new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
     });
+  }
+  function drawWave(ctx, x, y, w, color) {
+    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x, y);
+    for (var i = 0; i <= w; i += 2) ctx.lineTo(x + i, y + Math.sin(i / 6) * 4);
+    ctx.stroke();
   }
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
-  function fitFont(ctx, text, maxW, start, min, family) {
-    for (var s = start; s > min; s -= 4) { ctx.font = "900 " + s + "px " + family; if (ctx.measureText(text).width <= maxW) return s; }
+  function fitFont(ctx, text, maxW, start, min, family, weight) {
+    weight = weight || "900";
+    for (var s = start; s > min; s -= 4) { ctx.font = weight + " " + s + "px " + family; if (ctx.measureText(text).width <= maxW) return s; }
     return min;
   }
   function truncate(ctx, text, maxW) {

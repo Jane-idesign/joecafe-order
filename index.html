@@ -3,37 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#e6f8fa" />
+  <meta name="theme-color" content="#1b6a99" />
   <title>淺水灣小聚 · 夏天的尾巴我來了！</title>
   <meta name="description" content="淺水灣小聚訂餐：選餐、填寫點餐家庭、產生訂單小卡。" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2347c9db'/%3E%3Ctext x='32' y='42' font-size='30' text-anchor='middle'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231b6a99'/%3E%3Ctext x='32' y='42' font-size='30' text-anchor='middle'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=202609221544" />
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=202609221549" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar__card">
-    <div class="topbar__inner">
-      <button class="topbar__back" id="backBtn" type="button" aria-label="返回" hidden>‹</button>
-      <div class="topbar__title">
-        <span class="topbar__store">淺水灣小聚</span>
-        <h1 id="pageTitle">夏天的尾巴我來了！</h1>
-      </div>
-      <span class="topbar__wave" aria-hidden="true">🌊</span>
+  <header class="hero" id="hero">
+    <div class="hero__bar">
+      <button class="hero__back" id="backBtn" type="button" aria-label="返回" hidden>←</button>
     </div>
-    <nav class="cattabs" id="catTabs" aria-label="餐點分類"></nav>
+    <div class="hero__text">
+      <span class="hero__store">淺水灣小聚</span>
+      <h1 id="pageTitle">夏天的尾巴我來了！</h1>
     </div>
   </header>
 
-  <main id="app" class="app">
+  <main id="app" class="app sheet">
+    <nav class="cattabs" id="catTabs" aria-label="餐點分類"></nav>
     <!-- 步驟 1：菜單 -->
     <section id="viewMenu" class="view view--menu"></section>
 
     <!-- 步驤 2：確認 -->
     <section id="viewReview" class="view view--review" hidden>
-      <h2 class="section-title">確認餐點</h2>
+      <h2 class="section-title">你的餐點</h2>
       <div id="reviewList" class="review-list"></div>
       <div class="review-total">
         <span>總金額</span>
@@ -53,8 +50,7 @@
     <!-- 步驟 3：完成 -->
     <section id="viewDone" class="view view--done" hidden>
       <div class="done-head">
-        <div class="done-check">✓</div>
-        <h2 class="section-title">收到你的訂餐</h2>
+                <h2 class="section-title">收到你的訂餐</h2>
         <p class="done-sub">淺水灣我們不見不散～🩵</p>
         <p class="done-sub is-warn" id="doneWarn" hidden></p>
       </div>
@@ -79,8 +75,8 @@
 
   <canvas id="cardCanvas" hidden></canvas>
 
-  <script src="js/config.js?v=202609221544"></script>
-  <script src="js/menu.js?v=202609221544"></script>
-  <script src="js/app.js?v=202609221544"></script>
+  <script src="js/config.js?v=202609221549"></script>
+  <script src="js/menu.js?v=202609221549"></script>
+  <script src="js/app.js?v=202609221549"></script>
 </body>
 </html>
