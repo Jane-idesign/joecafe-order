@@ -39,34 +39,40 @@ button, input { font: inherit; }
 img { display: block; max-width: 100%; }
 [hidden] { display: none !important; }
 
-/* ---------- Top bar ---------- */
+/* ---------- Top bar (floating white card) ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 20;
-  background: rgba(230, 248, 250, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: var(--ink);
+  padding: 10px 16px 0;
+  background: linear-gradient(to bottom, var(--bg) 60%, rgba(230, 248, 250, 0));
+}
+.topbar__card {
+  max-width: 960px; margin: 0 auto;
+  background: var(--paper); border-radius: 26px;
+  box-shadow: 0 10px 30px rgba(71, 201, 219, 0.16), 0 1px 0 rgba(255,255,255,0.8) inset;
+  overflow: hidden;
 }
 .topbar__inner {
-  max-width: 960px; margin: 0 auto;
   display: flex; align-items: center; gap: 12px;
-  padding: 18px 20px 8px;
+  padding: 16px 18px 6px;
 }
 .topbar__back {
-  width: 38px; height: 38px; border-radius: 50%;
-  border: none; background: #fff; color: var(--ink);
-  font-size: 24px; line-height: 1; cursor: pointer; box-shadow: var(--shadow-sm);
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: var(--aqua-soft); color: var(--aqua-deep);
+  font-size: 22px; line-height: 1; cursor: pointer;
 }
 .topbar__title { flex: 1; min-width: 0; }
 .topbar__store {
-  display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.22em;
-  color: var(--aqua); margin-bottom: 2px;
+  display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.24em;
+  color: var(--aqua); margin-bottom: 3px;
 }
-.topbar__title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.01em; color: var(--ink); }
+.topbar__title h1 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: 0.01em; color: var(--ink); }
+.topbar__wave {
+  width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+  background: var(--aqua-soft); font-size: 22px; flex: 0 0 auto;
+}
 
 .cattabs {
-  display: flex; gap: 22px; overflow-x: auto; padding: 8px 20px 14px;
-  max-width: 960px; margin: 0 auto;
+  display: flex; gap: 22px; overflow-x: auto; padding: 10px 18px 14px;
   scrollbar-width: none;
 }
 .cattabs::-webkit-scrollbar { display: none; }
@@ -81,13 +87,16 @@ img { display: block; max-width: 100%; }
 }
 .cattabs a.is-active { color: var(--aqua); font-weight: 600; }
 .cattabs a.is-active::after { transform: scaleX(1); }
+/* when tabs are hidden (step 2/3), keep card bottom padding */
+.cattabs[hidden] + * { padding-bottom: 0; }
+.topbar__card:has(.cattabs[hidden]) .topbar__inner { padding-bottom: 14px; }
 
 /* ---------- Layout ---------- */
-.app { max-width: 960px; margin: 0 auto; padding: 14px 20px; }
+.app { max-width: 960px; margin: 0 auto; padding: 18px 20px 14px; }
 .section-title { font-size: 22px; font-weight: 600; margin: 8px 0 16px; color: var(--ink); }
 
 /* ---------- Menu ---------- */
-.cat { margin-bottom: 34px; scroll-margin-top: 112px; }
+.cat { margin-bottom: 34px; scroll-margin-top: 132px; }
 .cat__head { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 14px; }
 .cat__head h2 { margin: 0; font-size: 19px; font-weight: 600; color: var(--ink); }
 .cat__head span { font-size: 11px; letter-spacing: 0.22em; color: var(--muted); font-weight: 500; }

@@ -123,7 +123,7 @@
           });
         }
       });
-    }, { rootMargin: "-120px 0px -70% 0px", threshold: 0 });
+    }, { rootMargin: "-140px 0px -70% 0px", threshold: 0 });
     document.querySelectorAll(".cat").forEach(function (s) { io.observe(s); });
   }
 
