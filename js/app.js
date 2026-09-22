@@ -263,7 +263,12 @@
           '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
           '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
         "</div>" +
-        (sh.drinkMode === "add" ? '<p class="addon-hint">最多可加購一杯飲品</p>' : "");
+        (sh.drinkMode !== "add" ? "" :
+          sh.drink
+            ? '<p class="addon-hint addon-hint--sel">已選飲品：<b>' + esc(ITEMS[sh.drink.id].name) + "</b>" +
+                (sh.drink.opts.length ? '<span class="addon-hint__opts">' + esc(optsText(sh.drink.opts, true)) + "</span>" : "") +
+                '<span class="addon-hint__price">+' + money(sh.drink.extra) + "</span></p>"
+            : '<p class="addon-hint">最多可加購一杯飲品</p>');
       if (sh.drinkMode === "add") {
         html += '<div class="addon-list">' + setDrinks().map(function (d) {
             var on = sh.drink && sh.drink.id === d.item.id;

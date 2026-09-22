@@ -271,6 +271,10 @@ body.no-scroll { overflow: hidden; }
 .addon-row__check { width: 22px; height: 22px; border-radius: 50%; border: 1.2px solid #d5d9dd; display: grid; place-items: center; font-size: 13px; color: #fff; }
 .addon-row.is-on .addon-row__check { background: var(--ink); border-color: var(--ink); }
 .addon-hint { font-size: 12px; color: var(--muted); font-weight: 300; margin: 8px 0 0; }
+.addon-hint--sel { color: var(--ink); font-size: 13px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.addon-hint--sel b { font-weight: 500; }
+.addon-hint__opts { color: var(--sea); font-weight: 300; }
+.addon-hint__price { margin-left: auto; font-weight: 400; }
 .osheet__back { width: 36px; height: 36px; border-radius: 50%; border: none; background: #f1f3f5; color: var(--ink); font-size: 20px; cursor: pointer; flex: 0 0 auto; margin-right: 4px; }
 
 /* option summary text in lists */
