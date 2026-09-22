@@ -82,7 +82,7 @@
         '<div class="item__name">' + esc(item.name) + (item.tag ? '<span class="item__tag">' + esc(item.tag) + "</span>" : "") + "</div>" +
         (item.en ? '<div class="item__en">' + esc(item.en) + "</div>" : "") +
         (item.note ? '<div class="item__note">' + esc(item.note) + "</div>" : "") +
-        '<div class="item__price">' + money(item.price) + (item.id === "lt-cake" ? " <small>起</small>" : "") + "</div>" +
+        '<div class="item__price">' + money(item.price) + "</div>" +
       "</div>" +
       '<div class="qty">' + qtyHTML(item) + "</div>" +
       "</article>";
@@ -156,7 +156,7 @@
     $("#viewDone").hidden = n !== 3;
     $("#catTabs").hidden = n !== 1;
     $("#backBtn").hidden = n !== 2;
-    $("#pageTitle").textContent = n === 1 ? "淺水灣訂餐" : n === 2 ? "確認餐點" : "完成";
+    $("#pageTitle").textContent = n === 1 ? "夏天的尾巴我來了！" : n === 2 ? "確認餐點" : "完成";
     if (n === 2) renderReview();
     renderBottomBar();
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });

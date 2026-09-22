@@ -5,6 +5,7 @@ window.MENU = {
     { id: "set", name: "精緻套餐", en: "SET MEALS", emoji: "🍽️" },
     { id: "pizza", name: "披薩", en: "PIZZA", emoji: "🍕" },
     { id: "light", name: "輕食 / 點心", en: "LIGHT MEALS / SNACKS", emoji: "🥨" },
+    { id: "cake", name: "精緻蛋糕", en: "CAKES", emoji: "🍰" },
     { id: "coffee", name: "咖啡", en: "COFFEE", emoji: "☕" },
     { id: "tea", name: "茶", en: "TEA", emoji: "🍵" },
     { id: "other", name: "其他飲品", en: "OTHER DRINKS", emoji: "🥤" },
@@ -40,7 +41,6 @@ window.MENU = {
     { id: "lt-waffle-honey", cat: "light", name: "蜂蜜鬆餅", en: "Honey Waffle", price: 200 },
     { id: "lt-waffle-tuna", cat: "light", name: "鮪魚鬆餅", en: "Tuna Waffle", price: 260 },
     { id: "lt-waffle-ice", cat: "light", name: "冰淇淋鬆餅", en: "Ice Cream Waffle", price: 280 },
-    { id: "lt-cake", cat: "light", name: "精緻蛋糕", en: "Cake", price: 168, note: "$168 起，多達 16 種口味現場選", img: "img/cake.jpg" },
 
     // 咖啡
     { id: "cf-espresso", cat: "coffee", name: "義式雙倍濃縮咖啡", en: "Espresso (Double)", price: 180 },
@@ -72,5 +72,24 @@ window.MENU = {
     { id: "ot-mango", cat: "other", name: "新鮮芒果冰", en: "Fresh Mango Ice", price: 220, tag: "季節限定", img: "img/mango-ice.jpg" },
     { id: "ot-fruit-smoothie", cat: "other", name: "冰淇淋水果冰沙", en: "Fruit Smoothie with Ice Cream", price: 260 },
     { id: "ot-choco-smoothie", cat: "other", name: "冰淇淋巧克力冰沙", en: "Chocolate Smoothie with Ice Cream", price: 260, img: "img/choco-smoothie.jpg" },
+
+    // 精緻蛋糕（口味與價格取自 didieats 線上菜單）
+    { id: "ck-basque", cat: "cake", name: "巴斯克乳酪", en: "Basque Cheesecake", price: 168, img: "img/cake-basque.jpg" },
+    { id: "ck-hazelnut-roll", cat: "cake", name: "榛果巧克力捲", en: "Hazelnut Chocolate Roll", price: 168 },
+    { id: "ck-rich-choco", cat: "cake", name: "濃情巧克力", en: "Rich Chocolate", price: 168 },
+    { id: "ck-bubble-castle", cat: "cake", name: "泡泡城堡", en: "Bubble Castle", price: 188 },
+    { id: "ck-lemon", cat: "cake", name: "檸檬乳酪", en: "Lemon Cheesecake", price: 168 },
+    { id: "ck-banana-choco", cat: "cake", name: "香蕉巧克力乳酪", en: "Banana Chocolate Cheesecake", price: 168, img: "img/cake-banana-choco.jpg" },
+    { id: "ck-matcha", cat: "cake", name: "抹茶乳酪", en: "Matcha Cheesecake", price: 168, img: "img/cake-matcha.jpg" },
+    { id: "ck-choco-roll", cat: "cake", name: "巧克力生乳捲", en: "Chocolate Cream Roll", price: 168 },
+    { id: "ck-salted-caramel", cat: "cake", name: "焦糖海鹽乳酪", en: "Salted Caramel Cheesecake", price: 168, img: "img/cake-salted-caramel.jpg" },
+    { id: "ck-black-duke", cat: "cake", name: "黑爵士乳酪", en: "Black Duke Cheesecake", price: 168, img: "img/cake-black-duke.jpg" },
+    { id: "ck-raw-choco", cat: "cake", name: "生巧克力乳酪", en: "Raw Chocolate Cheesecake", price: 168, img: "img/cake-raw-choco.jpg" },
+    { id: "ck-black-cherry", cat: "cake", name: "黑櫻桃乳酪", en: "Black Cherry Cheesecake", price: 168, img: "img/cake-black-cherry.jpg" },
+    { id: "ck-peru-choco", cat: "cake", name: "秘魯巧克力乳酪", en: "Peru Chocolate Cheesecake", price: 168, img: "img/cake-peru-choco.jpg" },
+    { id: "ck-blueberry", cat: "cake", name: "藍莓堡", en: "Blueberry Fort", price: 188 },
+    { id: "ck-cranberry", cat: "cake", name: "蔓越莓乳酪", en: "Cranberry Cheesecake", price: 168, img: "img/cake-cranberry.jpg" },
+    { id: "ck-strawberry", cat: "cake", name: "草莓香乳酪", en: "Strawberry Cheesecake", price: 168, img: "img/cake-strawberry.jpg" },
+    { id: "ck-sacher", cat: "cake", name: "沙哈拉慕斯", en: "Sacher Mousse", price: 168, img: "img/cake-sacher.jpg" },
   ],
 };
