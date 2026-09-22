@@ -61,14 +61,15 @@ body[data-step="2"] .hero__text h1, body[data-step="3"] .hero__text h1 { font-si
   min-height: calc(100dvh - var(--hero-h) + 28px);
   box-shadow: 0 -10px 30px rgba(0, 30, 60, 0.12);
 }
-.app { max-width: 960px; margin: 0 auto; padding: 8px 24px 14px; }
+.app { padding: 8px 24px 14px; }
+.app > .view { max-width: 960px; margin: 0 auto; }
 .section-title { font-size: 30px; font-weight: 300; margin: 18px 0 20px; color: var(--ink); letter-spacing: 0.02em; }
 
 /* ---------- Category tabs (sticky inside the sheet) ---------- */
 .cattabs {
   position: sticky; top: 0; z-index: 5;
   display: flex; gap: 26px; overflow-x: auto;
-  margin: 0 -24px 6px; padding: 22px 24px 12px;
+  max-width: 960px; margin: 0 auto 6px; padding: 22px 0 12px;
   background: linear-gradient(to bottom, #fff 82%, rgba(255,255,255,0));
   scrollbar-width: none;
 }
