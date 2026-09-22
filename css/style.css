@@ -221,6 +221,7 @@ body[data-step="2"] .hero__text h1, body[data-step="3"] .hero__text h1 { font-si
 .osheet__body { overflow-y: auto; padding: 0 24px 10px; -webkit-overflow-scrolling: touch; }
 .osheet__toolbar { padding: 6px 24px 12px; border-bottom: 1px solid var(--line); box-shadow: 0 8px 12px -10px rgba(0,0,0,0.12); position: relative; z-index: 2; }
 .osheet__toolbar .ogroup__name { margin-bottom: 8px; }
+.osheet__toolbar.is-plain { border-bottom: none; box-shadow: none; padding-bottom: 16px; }
 .osheet__img { width: 56px; height: 56px; border-radius: 14px; overflow: hidden; flex: 0 0 auto; background: var(--sea-soft); display: grid; place-items: center; font-size: 24px; }
 .osheet__img img { width: 100%; height: 100%; object-fit: cover; }
 .osheet__img:empty { display: none; }

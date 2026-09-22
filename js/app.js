@@ -284,6 +284,8 @@
       toolbar.hidden = true; toolbar.innerHTML = "";
     }
     $("#optGroups").innerHTML = html;
+    $(".osheet__body").hidden = !html;          // 不加購時沒有可捲動內容
+    toolbar.classList.toggle("is-plain", !html); // 沒有內容就不畫分隔線與陰影
     $("#optQty").textContent = sh.qty;
     $(".osheet__qty").hidden = nested;
     $("#optAdd").innerHTML = (nested ? "選好了 " : "加入 ") + "<span>" + money(sheetUnit() * sh.qty) + "</span>";
