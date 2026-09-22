@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f5c3d" />
+  <title>淺水灣訂餐 · 喬咖館</title>
+  <meta name="description" content="喬咖館家庭訂餐：選餐、填寫點餐家庭、產生訂單小卡。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231f5c3d'/%3E%3Ctext x='32' y='42' font-size='30' text-anchor='middle'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <button class="topbar__back" id="backBtn" type="button" aria-label="返回" hidden>‹</button>
+      <div class="topbar__title">
+        <span class="topbar__store">喬咖館</span>
+        <h1 id="pageTitle">淺水灣訂餐</h1>
+      </div>
+      <span class="topbar__step" id="stepBadge">1 / 3</span>
+    </div>
+    <nav class="cattabs" id="catTabs" aria-label="餐點分類"></nav>
+  </header>
+
+  <main id="app" class="app">
+    <!-- 步驟 1：菜單 -->
+    <section id="viewMenu" class="view view--menu"></section>
+
+    <!-- 步驤 2：確認 -->
+    <section id="viewReview" class="view view--review" hidden>
+      <h2 class="section-title">確認餐點</h2>
+      <div id="reviewList" class="review-list"></div>
+      <div class="review-total">
+        <span>總金額</span>
+        <strong id="reviewTotal">$0</strong>
+      </div>
+
+      <form id="orderForm" class="order-form" novalidate>
+        <label class="field">
+          <span class="field__label">點餐家庭</span>
+          <input id="familyInput" name="family" type="text" placeholder="例如，小妍家" autocomplete="off" maxlength="30" required />
+          <span class="field__error" id="familyError" hidden>請填寫點餐家庭</span>
+        </label>
+        <p class="hint" id="sheetHint" hidden>⚠️ 尚未設定試算表連結，送出後只會產生小卡、不會寫入資料庫（設定方式見 README）。</p>
+      </form>
+    </section>
+
+    <!-- 步驟 3：完成 -->
+    <section id="viewDone" class="view view--done" hidden>
+      <div class="done-head">
+        <div class="done-check">✓</div>
+        <h2 class="section-title">訂單已送出</h2>
+        <p class="done-sub" id="doneSub">已寫入試算表</p>
+      </div>
+      <figure class="card-wrap">
+        <img id="cardImg" alt="訂單小卡" />
+        <figcaption>手機可長按圖片儲存</figcaption>
+      </figure>
+      <div class="done-actions">
+        <a id="downloadBtn" class="btn btn--primary" download="order.png">⬇ 下載小卡</a>
+        <button id="shareBtn" class="btn btn--ghost" type="button" hidden>分享</button>
+        <button id="restartBtn" class="btn btn--ghost" type="button">再點一單</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部主按鈕 -->
+  <footer class="bottombar" id="bottomBar" hidden>
+    <button class="bottombar__btn" id="primaryBtn" type="button">
+      <span class="bottombar__count" id="primaryCount">0 項</span>
+      <span class="bottombar__label" id="primaryLabel">下一步</span>
+      <span class="bottombar__total" id="primaryTotal">$0</span>
+    </button>
+  </footer>
+
+  <canvas id="cardCanvas" hidden></canvas>
+
+  <script src="js/config.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
