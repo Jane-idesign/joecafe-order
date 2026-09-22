@@ -212,7 +212,8 @@ body[data-step="2"] .hero__text h1, body[data-step="3"] .hero__text h1 { font-si
 .osheet__head { display: flex; align-items: flex-start; gap: 12px; padding: 22px 24px 6px; }
 .osheet__title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .osheet__title h3 { margin: 0; font-size: 26px; font-weight: 300; line-height: 1.2; }
-.osheet__price { font-size: 18px; font-weight: 300; color: var(--muted); }
+.osheet__price { font-size: 16px; font-weight: 300; color: var(--muted); }
+.osheet__price del { margin-right: 4px; }
 .osheet__close {
   width: 36px; height: 36px; border-radius: 50%; border: none; background: #f1f3f5; color: var(--ink);
   font-size: 22px; line-height: 1; cursor: pointer; flex: 0 0 auto;
@@ -248,6 +249,25 @@ body[data-step="2"] .hero__text h1, body[data-step="3"] .hero__text h1 { font-si
   font-size: 16px; font-weight: 400; letter-spacing: 0.06em; cursor: pointer; display: flex; justify-content: space-between;
 }
 body.no-scroll { overflow: hidden; }
+
+/* set-meal drink add-on list */
+.addon-list { display: grid; gap: 0; margin-top: 6px; border-top: 1px solid var(--line); }
+.addon-row {
+  display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; background: none; border-left: none; border-right: none; border-top: none; text-align: left; width: 100%; color: var(--ink);
+}
+.addon-row__img { width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--sea-soft); display: grid; place-items: center; font-size: 22px; }
+.addon-row__img img { width: 100%; height: 100%; object-fit: cover; }
+.addon-row__name { font-size: 15px; font-weight: 400; }
+.addon-row__opts { font-size: 12px; color: var(--sea); font-weight: 300; margin-top: 2px; }
+.addon-row__price { text-align: right; font-size: 15px; font-weight: 400; white-space: nowrap; }
+.addon-row__price del { display: block; color: var(--muted); font-size: 12px; font-weight: 300; }
+.addon-row.is-on { background: #f5f7f9; margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
+.addon-row.is-on .addon-row__name { font-weight: 500; }
+.addon-row__check { width: 22px; height: 22px; border-radius: 50%; border: 1.2px solid #d5d9dd; display: grid; place-items: center; font-size: 13px; color: #fff; }
+.addon-row.is-on .addon-row__check { background: var(--ink); border-color: var(--ink); }
+.addon-hint { font-size: 12px; color: var(--muted); font-weight: 300; margin: 8px 0 0; }
+.osheet__back { width: 36px; height: 36px; border-radius: 50%; border: none; background: #f1f3f5; color: var(--ink); font-size: 20px; cursor: pointer; flex: 0 0 auto; margin-right: 4px; }
 
 /* option summary text in lists */
 .item__opts { font-size: 12px; color: var(--sea); font-weight: 300; margin-top: 3px; line-height: 1.4; }

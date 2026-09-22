@@ -37,7 +37,13 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   };
-  function hasOptions(item) { return Array.isArray(item.options) && item.options.length > 0; }
+  function hasOptions(item) { return (Array.isArray(item.options) && item.options.length > 0) || !!item.addon; }
+  function setDrinks() {
+    var cfg = MENU.setDrink || { cats: [], discount: 0, exclude: [] };
+    return MENU.items.filter(function (it) { return cfg.cats.indexOf(it.cat) >= 0 && cfg.exclude.indexOf(it.id) < 0; })
+      .map(function (it) { return { item: it, addon: it.price - cfg.discount }; });
+  }
+  function setDrinkAddon(id) { var d = setDrinks().filter(function (x) { return x.item.id === id; })[0]; return d ? d.addon : 0; }
   function lineExtra(line) { return (line.opts || []).reduce(function (s, o) { return s + (o.extra || 0); }, 0); }
   function lineUnit(line) { return ITEMS[line.id].price + lineExtra(line); }
   function optsText(opts, withExtra) {
@@ -189,15 +195,15 @@
     $("#primaryBtn").disabled = state.submitting;
   }
 
-  // ---------- option sheet ----------
-  function openSheet(item) {
+  // ---------- option sheet (supports one nested level: set meal → drink) ----------
+  function newSheet(item, parent) {
     var picks = {};
-    item.options.forEach(function (g) { if (g.required && g.choices.length === 1) picks[g.name] = 0; });
-    state.sheet = { item: item, qty: 1, picks: picks };
-    $("#optName").textContent = item.name;
-    $("#optPrice").textContent = money(item.price);
-    $("#optImg").innerHTML = item.img ? '<img src="' + item.img + '" alt="" />' : "";
-    renderSheetGroups();
+    (item.options || []).forEach(function (g) { if (g.required && g.choices.length === 1) picks[g.name] = 0; });
+    return { item: item, qty: 1, picks: picks, parent: parent || null, drinkMode: "none", drink: null };
+  }
+  function openSheet(item, parent) {
+    state.sheet = newSheet(item, parent);
+    renderSheet();
     $("#optSheet").hidden = false;
     document.body.classList.add("no-scroll");
   }
@@ -206,43 +212,100 @@
     $("#optSheet").hidden = true;
     document.body.classList.remove("no-scroll");
   }
-  function sheetUnit() {
-    var sh = state.sheet, extra = 0;
-    sh.item.options.forEach(function (g) {
+  function backToParent() {
+    if (state.sheet && state.sheet.parent) { state.sheet = state.sheet.parent; renderSheet(); $(".osheet__body").scrollTop = 0; }
+    else closeSheet();
+  }
+  function optsExtra(sh) {
+    var extra = 0;
+    (sh.item.options || []).forEach(function (g) {
       var i = sh.picks[g.name];
       if (i !== undefined && g.choices[i] && g.choices[i].extra) extra += g.choices[i].extra;
     });
-    return sh.item.price + extra;
+    return extra;
   }
-  function renderSheetGroups() {
+  function sheetUnit() {
     var sh = state.sheet;
-    $("#optGroups").innerHTML = sh.item.options.map(function (g, gi) {
+    var base = sh.parent ? setDrinkAddon(sh.item.id) : sh.item.price; // nested drink: add-on price
+    return base + optsExtra(sh) + (sh.drink ? sh.drink.extra : 0);
+  }
+  function pickedOpts(sh) {
+    var opts = [];
+    (sh.item.options || []).forEach(function (g) {
+      var i = sh.picks[g.name];
+      if (i !== undefined) opts.push({ group: g.name, label: g.choices[i].label, extra: g.choices[i].extra || 0 });
+    });
+    return opts;
+  }
+  function renderSheet() {
+    var sh = state.sheet, item = sh.item, nested = !!sh.parent;
+    $("#optBack").hidden = !nested;
+    $("#optName").textContent = item.name;
+    $("#optPrice").innerHTML = nested
+      ? '<del>' + money(item.price) + "</del> 加購 +" + money(setDrinkAddon(item.id))
+      : money(item.price);
+    $("#optImg").innerHTML = item.img ? '<img src="' + item.img + '" alt="" />' : "";
+    var html = (item.options || []).map(function (g, gi) {
       return '<div class="ogroup" data-gi="' + gi + '">' +
-        '<div class="ogroup__name">' + esc(g.name) + (g.required ? '<span class="req">必選</span>' : '<span class="opt">可不選</span>') + "</div>" +
+        '<div class="ogroup__name">' + esc(g.name) + (g.required ? '<span class="req">必選</span>' : '<span class="opt">選填</span>') + "</div>" +
         '<div class="chips">' + g.choices.map(function (c, ci) {
           var on = sh.picks[g.name] === ci;
           return '<button type="button" class="chip' + (on ? " is-on" : "") + '" data-gi="' + gi + '" data-ci="' + ci + '">' +
             esc(c.label) + (c.extra ? "<small>+$" + c.extra + "</small>" : "") + "</button>";
-        }).join("") + "</div>" +
-      "</div>";
+        }).join("") + "</div></div>";
     }).join("");
+    if (item.addon === "drink") {
+      html += '<div class="ogroup" data-gi="drink">' +
+        '<div class="ogroup__name">飲品<span class="opt">選填</span></div>' +
+        '<div class="chips">' +
+          '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
+          '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
+        "</div>";
+      if (sh.drinkMode === "add") {
+        html += '<p class="addon-hint">點選飲品後會進入該飲品的規格選擇，加購價 = 單點價 − $' + (MENU.setDrink.discount || 0) + "</p>" +
+          '<div class="addon-list">' + setDrinks().map(function (d) {
+            var on = sh.drink && sh.drink.id === d.item.id;
+            return '<button type="button" class="addon-row' + (on ? " is-on" : "") + '" data-drink="' + d.item.id + '">' +
+              '<div class="addon-row__img">' + (d.item.img ? '<img src="' + d.item.img + '" alt="" loading="lazy" />' : CATS[d.item.cat].emoji) + "</div>" +
+              '<div><div class="addon-row__name">' + esc(d.item.name) + "</div>" +
+                (on && sh.drink.opts.length ? '<div class="addon-row__opts">' + esc(optsText(sh.drink.opts, true)) + " · 點擊可修改</div>" : "") + "</div>" +
+              '<div class="addon-row__price"><del>' + money(d.item.price) + "</del>+" + money(d.addon + (on ? sh.drink.extra - d.addon : 0)) + "</div>" +
+            "</button>";
+          }).join("") + "</div>";
+      }
+      html += "</div>";
+    }
+    $("#optGroups").innerHTML = html;
     $("#optQty").textContent = sh.qty;
-    $("#optTotal").textContent = money(sheetUnit() * sh.qty);
+    $(".osheet__qty").hidden = nested;
+    $("#optAdd").innerHTML = (nested ? "選好了 " : "加入 ") + "<span>" + money(sheetUnit() * sh.qty) + "</span>";
   }
   function confirmSheet() {
     var sh = state.sheet, missing = [];
-    sh.item.options.forEach(function (g, gi) {
+    (sh.item.options || []).forEach(function (g, gi) {
       var el = $('#optGroups .ogroup[data-gi="' + gi + '"]');
       var miss = g.required && sh.picks[g.name] === undefined;
       el.classList.toggle("is-missing", miss);
       if (miss) missing.push(el);
     });
-    if (missing.length) { missing[0].scrollIntoView({ behavior: "smooth", block: "center" }); toast("請先選擇必選項目"); return; }
-    var opts = [];
-    sh.item.options.forEach(function (g) {
-      var i = sh.picks[g.name];
-      if (i !== undefined) opts.push({ group: g.name, label: g.choices[i].label, extra: g.choices[i].extra || 0 });
-    });
+    if (sh.item.addon === "drink" && sh.drinkMode === "add" && !sh.drink) {
+      var del = $('#optGroups .ogroup[data-gi="drink"]'); del.classList.add("is-missing"); missing.push(del);
+    }
+    if (missing.length) { missing[0].scrollIntoView({ behavior: "smooth", block: "center" }); toast("請先完成必選項目"); return; }
+
+    var opts = pickedOpts(sh);
+    if (sh.parent) {
+      // nested drink chosen for a set meal → hand back to parent sheet
+      var parent = sh.parent;
+      parent.drink = { id: sh.item.id, opts: opts, extra: setDrinkAddon(sh.item.id) + optsExtra(sh) };
+      state.sheet = parent;
+      renderSheet();
+      return;
+    }
+    if (sh.drink) {
+      var d = ITEMS[sh.drink.id];
+      opts.push({ group: "飲品", label: "加購 " + d.name + (sh.drink.opts.length ? "（" + optsText(sh.drink.opts, false).replace(/ · /g, "／") + "）" : ""), extra: sh.drink.extra });
+    }
     addLine(sh.item.id, sh.qty, opts);
     toast("已加入 " + sh.item.name + " × " + sh.qty);
     closeSheet();
@@ -463,20 +526,26 @@
   });
   $("#optSheet").addEventListener("click", function (e) {
     if (e.target.closest("[data-close]")) { closeSheet(); return; }
+    if (e.target.closest("#optBack")) { backToParent(); return; }
+    var sh = state.sheet; if (!sh) return;
+    var dm = e.target.closest("[data-dm]");
+    if (dm) { sh.drinkMode = dm.dataset.dm; if (sh.drinkMode === "none") sh.drink = null; renderSheet(); return; }
+    var row = e.target.closest("[data-drink]");
+    if (row) { openSheet(ITEMS[row.dataset.drink], sh); $(".osheet__body").scrollTop = 0; return; }
     var chip = e.target.closest(".chip");
-    if (chip) {
-      var g = state.sheet.item.options[+chip.dataset.gi], ci = +chip.dataset.ci;
-      var cur = state.sheet.picks[g.name];
-      if (cur === ci && !g.required) delete state.sheet.picks[g.name]; // optional: tap again to clear
-      else state.sheet.picks[g.name] = ci;
-      renderSheetGroups();
+    if (chip && chip.dataset.gi !== undefined) {
+      var g = sh.item.options[+chip.dataset.gi], ci = +chip.dataset.ci;
+      var cur = sh.picks[g.name];
+      if (cur === ci && !g.required) delete sh.picks[g.name];
+      else sh.picks[g.name] = ci;
+      renderSheet();
       return;
     }
     var oq = e.target.closest("[data-oq]");
-    if (oq) { state.sheet.qty = Math.max(1, Math.min(99, state.sheet.qty + (+oq.dataset.oq))); renderSheetGroups(); return; }
+    if (oq) { sh.qty = Math.max(1, Math.min(99, sh.qty + (+oq.dataset.oq))); renderSheet(); return; }
     if (e.target.closest("#optAdd")) confirmSheet();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && state.sheet) closeSheet(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && state.sheet) backToParent(); });
   $("#catTabs").addEventListener("click", function (e) {
     var a = e.target.closest("a"); if (!a) return;
     e.preventDefault();

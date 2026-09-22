@@ -17,6 +17,8 @@ var ICE_ALL = ["去冰", "少冰", "正常冰", "熱"];
 
 window.MENU = {
   store: "喬咖館",
+  // 套餐加購飲品：可加購的分類、加購價 = 單點價 − 折抵、排除品項（取自 didieats 套餐選項）
+  setDrink: { cats: ["coffee", "tea", "other"], discount: 40, exclude: ["ot-mango"] },
   categories: [
     { id: "set", name: "精緻套餐", en: "SET MEALS", emoji: "🍽️" },
     { id: "pizza", name: "披薩", en: "PIZZA", emoji: "🍕" },
@@ -27,11 +29,11 @@ window.MENU = {
   ],
   items: [
     // 精緻套餐
-    { id: "set-chicken", cat: "set", name: "香草脆皮烤雞腿餐", en: "Herb Crispy Roasted Chicken Leg Set", price: 380, img: "img/chicken-leg-set.jpg" },
-    { id: "set-salmon", cat: "set", name: "檸檬鹽烤鮭魚排餐", en: "Lemon Salt-Grilled Salmon Steak Set", price: 460, img: "img/salmon-set.jpg" },
-    { id: "set-fish", cat: "set", name: "鹽烤菲力魚排餐", en: "Salt-Grilled Fillet Fish Steak Set", price: 360 },
-    { id: "set-ribs", cat: "set", name: "煙烤豬肋排套餐", en: "Smoked BBQ Pork Ribs Set", price: 560, img: "img/pork-ribs-set.jpg" },
-    { id: "set-knuckle", cat: "set", name: "脆烤德國豬腳套餐", en: "Crispy Roast German Pork Knuckle Set", price: 880, img: "img/pork-knuckle-set.jpg" },
+    { id: "set-chicken", cat: "set", name: "香草脆皮烤雞腿餐", en: "Herb Crispy Roasted Chicken Leg Set", price: 380, img: "img/chicken-leg-set.jpg", addon: "drink" },
+    { id: "set-salmon", cat: "set", name: "檸檬鹽烤鮭魚排餐", en: "Lemon Salt-Grilled Salmon Steak Set", price: 460, img: "img/salmon-set.jpg", addon: "drink" },
+    { id: "set-fish", cat: "set", name: "鹽烤菲力魚排餐", en: "Salt-Grilled Fillet Fish Steak Set", price: 360, addon: "drink" },
+    { id: "set-ribs", cat: "set", name: "煙烤豬肋排套餐", en: "Smoked BBQ Pork Ribs Set", price: 560, img: "img/pork-ribs-set.jpg", addon: "drink" },
+    { id: "set-knuckle", cat: "set", name: "脆烤德國豬腳套餐", en: "Crispy Roast German Pork Knuckle Set", price: 880, img: "img/pork-knuckle-set.jpg", addon: "drink" },
 
     // 披薩
     { id: "pz-veg", cat: "pizza", name: "什錦蔬菜披薩", en: "Mixed Vegetable Pizza", price: 360, tag: "奶素" },
@@ -53,9 +55,9 @@ window.MENU = {
     { id: "lt-strips", cat: "light", name: "檸香雞柳條", en: "Lemon Chicken Strips", price: 280 },
     { id: "lt-fries", cat: "light", name: "酥炸脆薯條", en: "Crispy French Fries", price: 200 },
     { id: "lt-knuckle", cat: "light", name: "德國豬腳拼盤", en: "German Pork Knuckle Platter", price: 1380, note: "德國豬腳、豬肋、薯條" },
-    { id: "lt-waffle-honey", cat: "light", name: "蜂蜜鬆餅", en: "Honey Waffle", price: 200 },
+    { id: "lt-waffle-honey", cat: "light", name: "蜂蜜鬆餅", en: "Honey Waffle", price: 200, options: [TOP_PEARL] },
     { id: "lt-waffle-tuna", cat: "light", name: "鮪魚鬆餅", en: "Tuna Waffle", price: 260 },
-    { id: "lt-waffle-ice", cat: "light", name: "冰淇淋鬆餅", en: "Ice Cream Waffle", price: 280 },
+    { id: "lt-waffle-ice", cat: "light", name: "冰淇淋鬆餅", en: "Ice Cream Waffle", price: 280, options: [TOP_PEARL] },
 
     // 咖啡
     { id: "cf-espresso", cat: "coffee", name: "義式雙倍濃縮咖啡", en: "Espresso (Double)", price: 180, options: [ICE(["熱"]), TOP4, LATER] },
