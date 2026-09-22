@@ -2,8 +2,8 @@
   --ink: #151515;
   --muted: #8a8f94;
   --line: #ececec;
-  --sea: #1b6a99;
-  --sea-soft: #e9f3f8;
+  --sea: #17a6cc;
+  --sea-soft: #e6f7fb;
   --paper: #ffffff;
   --bg: #f3f6f8;
   --danger: #d9534f;
@@ -35,7 +35,7 @@ img { display: block; max-width: 100%; }
 }
 .hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 20, 40, 0.35), rgba(0, 20, 40, 0) 55%);
+  background: linear-gradient(to bottom, rgba(0, 60, 90, 0.30), rgba(0, 60, 90, 0) 60%);
 }
 .hero__bar, .hero__text { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 0 24px; }
 .hero__bar { height: 64px; display: flex; align-items: center; }
@@ -47,7 +47,7 @@ img { display: block; max-width: 100%; }
 .hero__store { display: block; font-size: 12px; font-weight: 400; letter-spacing: 0.26em; opacity: 0.9; margin-bottom: 8px; }
 .hero__text h1 {
   margin: 0; font-size: 34px; font-weight: 300; line-height: 1.15; letter-spacing: 0.02em;
-  text-shadow: 0 2px 14px rgba(0, 20, 40, 0.25);
+  text-shadow: 0 2px 14px rgba(0, 60, 90, 0.35);
 }
 body[data-step="2"] .hero, body[data-step="3"] .hero { --hero-h: 200px; }
 body[data-step="2"] .hero__text h1, body[data-step="3"] .hero__text h1 { font-size: 28px; }

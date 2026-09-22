@@ -270,17 +270,17 @@
       canvas.width = W; canvas.height = H;
       var ctx = canvas.getContext("2d");
       var sans = '"Jost", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
-      var INK = "#151515", MUTED = "#8a8f94", LINE = "#ececec", SEA = "#1b6a99";
+      var INK = "#151515", MUTED = "#8a8f94", LINE = "#ececec", SEA = "#17a6cc";
 
       // hero: ocean photo
-      ctx.fillStyle = "#1b6a99"; ctx.fillRect(0, 0, W, heroH + 60);
+      ctx.fillStyle = "#17a6cc"; ctx.fillRect(0, 0, W, heroH + 60);
       if (ocean) {
         var sc = Math.max(W / ocean.width, (heroH + 60) / ocean.height);
         var sw = W / sc, sh = (heroH + 60) / sc;
         ctx.drawImage(ocean, (ocean.width - sw) / 2, (ocean.height - sh) * 0.35, sw, sh, 0, 0, W, heroH + 60);
       }
       var shade = ctx.createLinearGradient(0, 0, 0, heroH);
-      shade.addColorStop(0, "rgba(0,20,40,0.35)"); shade.addColorStop(0.6, "rgba(0,20,40,0)");
+      shade.addColorStop(0, "rgba(0,60,90,0.30)"); shade.addColorStop(0.6, "rgba(0,20,40,0)");
       ctx.fillStyle = shade; ctx.fillRect(0, 0, W, heroH);
       ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
       ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.font = "400 26px " + sans; ctx.letterSpacing = "6px";
