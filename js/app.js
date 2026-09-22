@@ -254,16 +254,16 @@
             esc(c.label) + (c.extra ? "<small>+$" + c.extra + "</small>" : "") + "</button>";
         }).join("") + "</div></div>";
     }).join("");
+    var toolbar = $("#optToolbar");
     if (item.addon === "drink") {
-      html += '<div class="ogroup ogroup--drink" data-gi="drink">' +
-        '<div class="addon-head">' +
-          '<div class="ogroup__name">飲品<span class="opt">選填</span></div>' +
-          '<div class="chips">' +
-            '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
-            '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
-          "</div>" +
-          (sh.drinkMode === "add" ? '<p class="addon-hint">最多可加購一杯飲品</p>' : "") +
-        "</div>";
+      toolbar.hidden = false;
+      toolbar.innerHTML =
+        '<div class="ogroup__name">飲品<span class="opt">選填</span></div>' +
+        '<div class="chips">' +
+          '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
+          '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
+        "</div>" +
+        (sh.drinkMode === "add" ? '<p class="addon-hint">最多可加購一杯飲品</p>' : "");
       if (sh.drinkMode === "add") {
         html += '<div class="addon-list">' + setDrinks().map(function (d) {
             var on = sh.drink && sh.drink.id === d.item.id;
@@ -275,7 +275,8 @@
             "</button>";
           }).join("") + "</div>";
       }
-      html += "</div>";
+    } else {
+      toolbar.hidden = true; toolbar.innerHTML = "";
     }
     $("#optGroups").innerHTML = html;
     $("#optQty").textContent = sh.qty;
