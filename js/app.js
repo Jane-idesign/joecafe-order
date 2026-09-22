@@ -255,19 +255,21 @@
         }).join("") + "</div></div>";
     }).join("");
     if (item.addon === "drink") {
-      html += '<div class="ogroup" data-gi="drink">' +
-        '<div class="ogroup__name">飲品<span class="opt">選填</span></div>' +
-        '<div class="chips">' +
-          '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
-          '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
+      html += '<div class="ogroup ogroup--drink" data-gi="drink">' +
+        '<div class="addon-head">' +
+          '<div class="ogroup__name">飲品<span class="opt">選填</span></div>' +
+          '<div class="chips">' +
+            '<button type="button" class="chip' + (sh.drinkMode === "none" ? " is-on" : "") + '" data-dm="none">不加購</button>' +
+            '<button type="button" class="chip' + (sh.drinkMode === "add" ? " is-on" : "") + '" data-dm="add">加購飲品</button>' +
+          "</div>" +
+          (sh.drinkMode === "add" ? '<p class="addon-hint">最多可加購一杯飲品</p>' : "") +
         "</div>";
       if (sh.drinkMode === "add") {
-        html += '<p class="addon-hint">點選飲品後會進入該飲品的規格選擇，加購價 = 單點價 − $' + (MENU.setDrink.discount || 0) + "</p>" +
-          '<div class="addon-list">' + setDrinks().map(function (d) {
+        html += '<div class="addon-list">' + setDrinks().map(function (d) {
             var on = sh.drink && sh.drink.id === d.item.id;
             return '<button type="button" class="addon-row' + (on ? " is-on" : "") + '" data-drink="' + d.item.id + '">' +
               '<div class="addon-row__img">' + (d.item.img ? '<img src="' + d.item.img + '" alt="" loading="lazy" />' : CATS[d.item.cat].emoji) + "</div>" +
-              '<div><div class="addon-row__name">' + esc(d.item.name) + "</div>" +
+              '<div class="addon-row__body"><div class="addon-row__name">' + esc(d.item.name) + "</div>" +
                 (on && sh.drink.opts.length ? '<div class="addon-row__opts">' + esc(optsText(sh.drink.opts, true)) + " · 點擊可修改</div>" : "") + "</div>" +
               '<div class="addon-row__price"><del>' + money(d.item.price) + "</del>+" + money(d.addon + (on ? sh.drink.extra - d.addon : 0)) + "</div>" +
             "</button>";
@@ -288,10 +290,11 @@
       el.classList.toggle("is-missing", miss);
       if (miss) missing.push(el);
     });
-    if (sh.item.addon === "drink" && sh.drinkMode === "add" && !sh.drink) {
-      var del = $('#optGroups .ogroup[data-gi="drink"]'); del.classList.add("is-missing"); missing.push(del);
-    }
     if (missing.length) { missing[0].scrollIntoView({ behavior: "smooth", block: "center" }); toast("請先完成必選項目"); return; }
+    if (sh.item.addon === "drink" && sh.drinkMode === "add" && !sh.drink) {
+      toast("還沒選飲品喔，挑一杯或改選「不加購」");
+      return;
+    }
 
     var opts = pickedOpts(sh);
     if (sh.parent) {
@@ -429,14 +432,19 @@
       var ocean = res[1];
       var W = 1080, pad = 84;
       var heroH = 520;
-      var rowH = function (it) { return it.options ? 110 : 78; };
-      var listH = order.items.reduce(function (s, it) { return s + rowH(it); }, 0);
-      var H = heroH + 150 + listH + 230;
       var canvas = $("#cardCanvas");
-      canvas.width = W; canvas.height = H;
       var ctx = canvas.getContext("2d");
       var sans = '"Jost", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
       var INK = "#151515", MUTED = "#8a8f94", LINE = "#ececec", SEA = "#17a6cc";
+      // measure option lines first (needs ctx + font), then size the canvas
+      ctx.font = "300 24px " + sans;
+      var rows = order.items.map(function (it) {
+        var lines = it.options ? wrapText(ctx, it.options, W - pad * 2 - 300) : [];
+        return { lines: lines, h: lines.length ? 62 + 32 * lines.length + 14 : 78 };
+      });
+      var listH = rows.reduce(function (s, r) { return s + r.h; }, 0);
+      var H = heroH + 150 + listH + 230;
+      canvas.width = W; canvas.height = H;
 
       ctx.fillStyle = "#17a6cc"; ctx.fillRect(0, 0, W, heroH + 60);
       if (ocean) {
@@ -466,14 +474,14 @@
       ctx.textBaseline = "middle";
       var y = top + 150;
       order.items.forEach(function (it, i) {
-        var h = rowH(it);
+        var row = rows[i], h = row.h;
         if (i > 0) { ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke(); }
-        var cy = y + (it.options ? 40 : h / 2);
+        var cy = y + (row.lines.length ? 40 : h / 2);
         ctx.textAlign = "left"; ctx.fillStyle = INK; ctx.font = "400 34px " + sans;
         ctx.fillText(truncate(ctx, it.baseName || it.name, W - pad * 2 - 300), pad, cy);
-        if (it.options) {
+        if (row.lines.length) {
           ctx.fillStyle = SEA; ctx.font = "300 24px " + sans;
-          ctx.fillText(truncate(ctx, it.options, W - pad * 2 - 300), pad, cy + 40);
+          row.lines.forEach(function (ln, k) { ctx.fillText(ln, pad, cy + 40 + k * 32); });
         }
         ctx.textAlign = "center"; ctx.fillStyle = INK; ctx.font = "300 34px " + sans;
         ctx.fillText("×" + it.qty, W - pad - 190, cy);
@@ -505,6 +513,14 @@
     weight = weight || "900";
     for (var s = start; s > min; s -= 4) { ctx.font = weight + " " + s + "px " + family; if (ctx.measureText(text).width <= maxW) return s; }
     return min;
+  }
+  function wrapText(ctx, text, maxW) {
+    var lines = [], cur = "";
+    Array.from(String(text)).forEach(function (ch) {
+      if (ctx.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch; } else cur += ch;
+    });
+    if (cur) lines.push(cur);
+    return lines;
   }
   function truncate(ctx, text, maxW) {
     if (ctx.measureText(text).width <= maxW) return text;
