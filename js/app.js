@@ -156,7 +156,6 @@
     $("#viewDone").hidden = n !== 3;
     $("#catTabs").hidden = n !== 1;
     $("#backBtn").hidden = n !== 2;
-    $("#stepBadge").textContent = n + " / 3";
     $("#pageTitle").textContent = n === 1 ? "淺水灣訂餐" : n === 2 ? "確認餐點" : "完成";
     if (n === 2) renderReview();
     renderBottomBar();
@@ -214,10 +213,10 @@
 
   function finish(order, res) {
     state.submitting = false;
-    var sub = $("#doneSub");
-    if (res.ok) { sub.textContent = "已寫入試算表 · 訂單編號 " + (res.orderId || order.orderId); sub.classList.remove("is-warn"); }
-    else if (res.skipped) { sub.textContent = "尚未連接試算表，僅產生小卡"; sub.classList.add("is-warn"); }
-    else { sub.textContent = "寫入試算表失敗，請下載小卡保存並告知管理者（" + (res.error || "unknown") + "）"; sub.classList.add("is-warn"); }
+    var warn = $("#doneWarn");
+    if (res.ok) { warn.hidden = true; }
+    else if (res.skipped) { warn.textContent = "⚠️ 尚未連接試算表，僅產生小卡"; warn.hidden = false; }
+    else { warn.textContent = "⚠️ 寫入試算表失敗，請下載小卡保存並告知管理者（" + (res.error || "unknown") + "）"; warn.hidden = false; }
 
     // 本機備份
     try {
@@ -232,9 +231,6 @@
       var dl = $("#downloadBtn");
       dl.href = url;
       dl.download = order.family + "-訂餐-" + fmtDate(new Date(order.time), "file") + ".png";
-      state._blob = blob;
-      var shareBtn = $("#shareBtn");
-      shareBtn.hidden = !(navigator.canShare && navigator.canShare({ files: [new File([blob], "a.png", { type: "image/png" })] }));
     });
 
     state.cart = {};
@@ -255,7 +251,7 @@
     return ready.then(function () {
       var W = 1080, pad = 72;
       var lineH = 74;
-      var headH = 330;
+      var headH = 290;
       var listH = order.items.length * lineH + 40;
       var H = headH + listH + 260;
       var canvas = $("#cardCanvas");
@@ -279,9 +275,7 @@
       ctx.letterSpacing = "0px";
       // family name
       ctx.fillStyle = "#ffffff"; ctx.font = "900 " + fitFont(ctx, order.family, W - 220, 88, 52, serif) + "px " + serif;
-      ctx.fillText(order.family, W / 2, 205);
-      ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = "400 26px " + sans;
-      ctx.fillText(fmtDate(new Date(order.time)) + "  ·  " + order.orderId, W / 2, 255);
+      ctx.fillText(order.family, W / 2, 200);
 
       // list card
       var top = headH;
@@ -361,14 +355,6 @@
   $("#orderForm").addEventListener("submit", function (e) { e.preventDefault(); submitOrder(); });
   $("#familyInput").addEventListener("input", function () {
     this.classList.remove("is-invalid"); $("#familyError").hidden = true;
-  });
-  $("#restartBtn").addEventListener("click", function () {
-    $("#familyInput").value = ""; goStep(1);
-  });
-  $("#shareBtn").addEventListener("click", function () {
-    if (!state._blob || !state.lastOrder) return;
-    var file = new File([state._blob], $("#downloadBtn").download, { type: "image/png" });
-    navigator.share({ files: [file], title: state.lastOrder.family + " 訂餐" }).catch(function () { /* cancelled */ });
   });
 
   // ---------- init ----------

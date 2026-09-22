@@ -187,7 +187,8 @@ img { display: block; max-width: 100%; }
 .card-wrap { margin: 18px auto; max-width: 420px; text-align: center; }
 .card-wrap img { width: 100%; border-radius: 18px; box-shadow: 0 16px 40px rgba(30, 40, 30, 0.18); }
 .card-wrap figcaption { font-size: 12px; color: var(--muted); margin-top: 10px; }
-.done-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 420px; margin: 0 auto; }
+.done-actions { display: flex; justify-content: center; max-width: 420px; margin: 0 auto; }
+.done-actions .btn { flex: 1 1 auto; }
 .btn {
   flex: 1 1 140px; padding: 14px 18px; border-radius: 999px; border: none; cursor: pointer;
   font-weight: 700; font-size: 16px; text-align: center; text-decoration: none;

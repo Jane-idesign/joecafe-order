@@ -20,7 +20,6 @@
         <span class="topbar__store">喬咖館</span>
         <h1 id="pageTitle">淺水灣訂餐</h1>
       </div>
-      <span class="topbar__step" id="stepBadge">1 / 3</span>
     </div>
     <nav class="cattabs" id="catTabs" aria-label="餐點分類"></nav>
   </header>
@@ -52,8 +51,9 @@
     <section id="viewDone" class="view view--done" hidden>
       <div class="done-head">
         <div class="done-check">✓</div>
-        <h2 class="section-title">訂單已送出</h2>
-        <p class="done-sub" id="doneSub">已寫入試算表</p>
+        <h2 class="section-title">收到你的訂餐</h2>
+        <p class="done-sub">淺水灣我們不見不散～🩵</p>
+        <p class="done-sub is-warn" id="doneWarn" hidden></p>
       </div>
       <figure class="card-wrap">
         <img id="cardImg" alt="訂單小卡" />
@@ -61,8 +61,6 @@
       </figure>
       <div class="done-actions">
         <a id="downloadBtn" class="btn btn--primary" download="order.png">⬇ 下載小卡</a>
-        <button id="shareBtn" class="btn btn--ghost" type="button" hidden>分享</button>
-        <button id="restartBtn" class="btn btn--ghost" type="button">再點一單</button>
       </div>
     </section>
   </main>
