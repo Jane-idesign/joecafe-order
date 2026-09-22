@@ -199,12 +199,17 @@
   }
 
   function postToSheet(order) {
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000); // Apps Script 冷啟動可能較慢
     return fetch(CONFIG.APPS_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // 避免 CORS 預檢
       body: JSON.stringify(order),
       redirect: "follow",
-    }).then(function (r) { return r.json(); });
+      signal: ctrl ? ctrl.signal : undefined,
+    }).then(function (r) { return r.json(); })
+      .catch(function (e) { return { ok: false, error: e && e.name === "AbortError" ? "連線逾時" : String(e) }; })
+      .finally(function () { clearTimeout(timer); });
   }
 
   function finish(order, res) {
@@ -212,7 +217,7 @@
     var sub = $("#doneSub");
     if (res.ok) { sub.textContent = "已寫入試算表 · 訂單編號 " + (res.orderId || order.orderId); sub.classList.remove("is-warn"); }
     else if (res.skipped) { sub.textContent = "尚未連接試算表，僅產生小卡"; sub.classList.add("is-warn"); }
-    else { sub.textContent = "寫入試算表失敗，請截圖小卡保存（" + (res.error || "unknown") + "）"; sub.classList.add("is-warn"); }
+    else { sub.textContent = "寫入試算表失敗，請下載小卡保存並告知管理者（" + (res.error || "unknown") + "）"; sub.classList.add("is-warn"); }
 
     // 本機備份
     try {
