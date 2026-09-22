@@ -251,54 +251,62 @@
     return ready.then(function () {
       var W = 1080, pad = 72;
       var lineH = 74;
-      var headH = 290;
+      var headH = 300;
       var listH = order.items.length * lineH + 40;
       var H = headH + listH + 260;
       var canvas = $("#cardCanvas");
       canvas.width = W; canvas.height = H;
       var ctx = canvas.getContext("2d");
       var sans = '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
-      var serif = '"Noto Serif TC", "Songti TC", "PingFang TC", serif';
+      var BLUE = "#3671ff", DEEP = "#1e3fbf", INK = "#10245f", YEL = "#ffff35", MINT = "#02ffd9", MUTED = "#6b7a99";
 
-      // background paper
-      ctx.fillStyle = "#f6f2e8"; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(31,92,61,0.06)";
-      for (var y = 0; y < H; y += 24) for (var x = 0; x < W; x += 24) { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI * 2); ctx.fill(); }
+      // background: light sky with halftone dots
+      ctx.fillStyle = "#eef5ff"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(54,113,255,0.14)";
+      for (var y = 0; y < H; y += 20) for (var x = 0; x < W; x += 20) { ctx.beginPath(); ctx.arc(x, y, 1.8, 0, Math.PI * 2); ctx.fill(); }
 
       // header band
-      roundRect(ctx, 36, 36, W - 72, headH - 60, 36); ctx.fillStyle = "#1f5c3d"; ctx.fill();
-      // decorative leaf line
-      ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(pad + 40, 110); ctx.lineTo(W - pad - 40, 110); ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.font = "500 26px " + sans; ctx.textAlign = "center"; ctx.letterSpacing = "8px";
-      ctx.fillText(MENU.store + " · 訂餐小卡", W / 2, 90);
-      ctx.letterSpacing = "0px";
+      roundRect(ctx, 36, 36, W - 72, headH - 60, 44); ctx.fillStyle = BLUE; ctx.fill();
+      // bubbles
+      ctx.save(); roundRect(ctx, 36, 36, W - 72, headH - 60, 44); ctx.clip();
+      ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.lineWidth = 3;
+      [[W - 90, 60, 90], [W - 190, 150, 26], [W - 140, 205, 12], [110, headH - 60, 70], [200, headH - 100, 18], [60, 120, 10]].forEach(function (b) {
+        ctx.beginPath(); ctx.arc(b[0], b[1], b[2], 0, Math.PI * 2); ctx.stroke();
+      });
+      ctx.restore();
+      // small yellow label
+      ctx.font = "700 24px " + sans; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      var label = "淺水灣小聚 · 訂餐小卡";
+      var lw = ctx.measureText(label).width + 44;
+      roundRect(ctx, W / 2 - lw / 2, 78, lw, 44, 22); ctx.fillStyle = YEL; ctx.fill();
+      ctx.fillStyle = DEEP; ctx.fillText(label, W / 2, 109);
       // family name
-      ctx.fillStyle = "#ffffff"; ctx.font = "900 " + fitFont(ctx, order.family, W - 220, 88, 52, serif) + "px " + serif;
-      ctx.fillText(order.family, W / 2, 200);
+      ctx.fillStyle = "#ffffff"; ctx.font = "900 " + fitFont(ctx, order.family, W - 220, 92, 52, sans) + "px " + sans;
+      ctx.fillText(order.family, W / 2, 215);
 
       // list card
       var top = headH;
-      roundRect(ctx, 36, top - 20, W - 72, listH + 150, 32);
-      ctx.fillStyle = "#fffdf8"; ctx.shadowColor = "rgba(30,40,30,0.12)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10; ctx.fill();
+      roundRect(ctx, 36, top - 20, W - 72, listH + 150, 40);
+      ctx.fillStyle = "#ffffff"; ctx.shadowColor = "rgba(54,113,255,0.18)"; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14; ctx.fill();
       ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
       ctx.textAlign = "left"; ctx.textBaseline = "middle";
       var yy = top + 40;
       order.items.forEach(function (it, i) {
-        if (i > 0) { ctx.strokeStyle = "#ece6d8"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(pad, yy - lineH / 2 + 4); ctx.lineTo(W - pad, yy - lineH / 2 + 4); ctx.stroke(); }
-        // bullet
-        ctx.fillStyle = "#c9a24a"; ctx.beginPath(); ctx.arc(pad + 10, yy, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#1d1f1c"; ctx.font = "500 34px " + sans;
-        ctx.fillText(truncate(ctx, it.name, W - pad * 2 - 260), pad + 36, yy);
+        if (i > 0) { ctx.strokeStyle = "#e4ecff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, yy - lineH / 2 + 4); ctx.lineTo(W - pad, yy - lineH / 2 + 4); ctx.stroke(); }
+        // bullet (mint dot with blue ring)
+        ctx.fillStyle = MINT; ctx.beginPath(); ctx.arc(pad + 10, yy, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = BLUE; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(pad + 10, yy, 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = INK; ctx.font = "500 34px " + sans;
+        ctx.fillText(truncate(ctx, it.name, W - pad * 2 - 260), pad + 38, yy);
         // qty pill
         var pill = "× " + it.qty;
-        ctx.font = "700 30px " + sans;
+        ctx.font = "900 30px " + sans;
         var pw = ctx.measureText(pill).width + 40;
-        roundRect(ctx, W - pad - 140 - pw, yy - 26, pw, 52, 26); ctx.fillStyle = "#e4efe7"; ctx.fill();
-        ctx.fillStyle = "#1f5c3d"; ctx.textAlign = "center"; ctx.fillText(pill, W - pad - 140 - pw / 2, yy + 1);
+        roundRect(ctx, W - pad - 140 - pw, yy - 26, pw, 52, 18); ctx.fillStyle = YEL; ctx.fill();
+        ctx.fillStyle = DEEP; ctx.textAlign = "center"; ctx.fillText(pill, W - pad - 140 - pw / 2, yy + 1);
         // subtotal
-        ctx.textAlign = "right"; ctx.fillStyle = "#6d7268"; ctx.font = "400 28px " + sans;
+        ctx.textAlign = "right"; ctx.fillStyle = MUTED; ctx.font = "500 28px " + sans;
         ctx.fillText(money(it.price * it.qty), W - pad, yy);
         ctx.textAlign = "left";
         yy += lineH;
@@ -306,13 +314,13 @@
 
       // total
       var ty = top + listH + 60;
-      ctx.strokeStyle = "#1f5c3d"; ctx.lineWidth = 2; ctx.setLineDash([8, 8]);
+      ctx.strokeStyle = BLUE; ctx.lineWidth = 3; ctx.setLineDash([10, 10]);
       ctx.beginPath(); ctx.moveTo(pad, ty - 40); ctx.lineTo(W - pad, ty - 40); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = "#1f5c3d"; ctx.font = "700 30px " + sans; ctx.fillText("共 " + order.items.reduce(function (s, i) { return s + i.qty; }, 0) + " 項", pad, ty + 10);
-      ctx.textAlign = "right"; ctx.font = "900 52px " + sans; ctx.fillText(money(order.total), W - pad, ty + 10);
+      ctx.fillStyle = DEEP; ctx.font = "700 30px " + sans; ctx.fillText("共 " + order.items.reduce(function (s, i) { return s + i.qty; }, 0) + " 項", pad, ty + 10);
+      ctx.textAlign = "right"; ctx.fillStyle = BLUE; ctx.font = "900 54px " + sans; ctx.fillText(money(order.total), W - pad, ty + 10);
 
       // footer
-      ctx.textAlign = "center"; ctx.fillStyle = "#8b8f86"; ctx.font = "400 24px " + sans;
+      ctx.textAlign = "center"; ctx.fillStyle = MUTED; ctx.font = "500 24px " + sans;
       ctx.fillText(CONFIG.CARD_FOOTER || MENU.store, W / 2, H - 60);
 
       return new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });

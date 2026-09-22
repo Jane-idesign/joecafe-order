@@ -3,5 +3,5 @@
 window.CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzBxhXUuwD17QBBlvXb3Syw5DbcIRE_wlE3h1mLvwINqld8IGqTrE1JoDPqDV9jvFHl/exec",
   // 小卡右下角署名
-  CARD_FOOTER: "喬咖館 · 淺水灣訂餐",
+  CARD_FOOTER: "淺水灣小聚 · 喬咖館",
 };
