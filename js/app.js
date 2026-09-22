@@ -9,17 +9,25 @@
   MENU.categories.forEach(function (c) { CATS[c.id] = c; });
 
   // ---------- state ----------
+  // cart: key -> { id, qty, opts: [{ group, label, extra }] }
+  //   key = id           (no options)
+  //   key = id|label|label…  (with options, in group order)
   var state = {
-    step: 1,           // 1 menu, 2 review, 3 done
-    cart: {},          // id -> qty
+    step: 1,
+    cart: {},
     submitting: false,
     lastOrder: null,
+    sheet: null, // { item, qty, picks: { groupName: choiceIndex } }
   };
 
   try {
-    var saved = JSON.parse(localStorage.getItem("cart") || "{}");
-    Object.keys(saved).forEach(function (id) { if (ITEMS[id] && saved[id] > 0) state.cart[id] = saved[id]; });
+    var saved = JSON.parse(localStorage.getItem("cart2") || "{}");
+    Object.keys(saved).forEach(function (k) {
+      var l = saved[k];
+      if (l && ITEMS[l.id] && l.qty > 0) state.cart[k] = { id: l.id, qty: l.qty, opts: l.opts || [] };
+    });
   } catch (e) { /* ignore */ }
+  function persist() { try { localStorage.setItem("cart2", JSON.stringify(state.cart)); } catch (e) { /* ignore */ } }
 
   // ---------- helpers ----------
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
@@ -29,21 +37,35 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   };
+  function hasOptions(item) { return Array.isArray(item.options) && item.options.length > 0; }
+  function lineExtra(line) { return (line.opts || []).reduce(function (s, o) { return s + (o.extra || 0); }, 0); }
+  function lineUnit(line) { return ITEMS[line.id].price + lineExtra(line); }
+  function optsText(opts, withExtra) {
+    return (opts || []).map(function (o) { return o.label + (withExtra && o.extra ? " +$" + o.extra : ""); }).join(" · ");
+  }
+  function lineKey(id, opts) { return opts && opts.length ? id + "|" + opts.map(function (o) { return o.label; }).join("|") : id; }
   function cartLines() {
-    return Object.keys(state.cart)
-      .filter(function (id) { return state.cart[id] > 0; })
-      .map(function (id) { return { item: ITEMS[id], qty: state.cart[id] }; });
+    return Object.keys(state.cart).map(function (k) { return Object.assign({ key: k }, state.cart[k]); }).filter(function (l) { return l.qty > 0; });
   }
-  function cartTotal() {
-    return cartLines().reduce(function (s, l) { return s + l.item.price * l.qty; }, 0);
-  }
-  function cartCount() {
-    return cartLines().reduce(function (s, l) { return s + l.qty; }, 0);
-  }
-  function setQty(id, qty) {
+  function cartTotal() { return cartLines().reduce(function (s, l) { return s + lineUnit(l) * l.qty; }, 0); }
+  function cartCount() { return cartLines().reduce(function (s, l) { return s + l.qty; }, 0); }
+  function itemCount(id) { return cartLines().filter(function (l) { return l.id === id; }).reduce(function (s, l) { return s + l.qty; }, 0); }
+
+  function setLineQty(key, qty) {
+    var line = state.cart[key];
+    if (!line) return;
     qty = Math.max(0, Math.min(99, qty));
-    if (qty === 0) delete state.cart[id]; else state.cart[id] = qty;
-    try { localStorage.setItem("cart", JSON.stringify(state.cart)); } catch (e) { /* ignore */ }
+    if (qty === 0) delete state.cart[key]; else line.qty = qty;
+    persist();
+    renderQty(line.id);
+    renderBottomBar();
+    if (state.step === 2) renderReview();
+  }
+  function addLine(id, qty, opts) {
+    var key = lineKey(id, opts);
+    if (state.cart[key]) state.cart[key].qty = Math.min(99, state.cart[key].qty + qty);
+    else state.cart[key] = { id: id, qty: qty, opts: opts || [] };
+    persist();
     renderQty(id);
     renderBottomBar();
     if (state.step === 2) renderReview();
@@ -63,20 +85,30 @@
     if (item.img) return '<div class="item__img ' + (cls || "") + '"><img src="' + item.img + '" alt="' + esc(item.name) + '" loading="lazy" /></div>';
     return '<div class="item__img item__img--ph ' + (cls || "") + '" aria-hidden="true">' + CATS[item.cat].emoji + "</div>";
   }
+  // menu row control
   function qtyHTML(item) {
-    var q = state.cart[item.id] || 0;
+    if (hasOptions(item)) {
+      var n = itemCount(item.id);
+      return (n > 0 ? '<span class="item__count" aria-label="已選 ' + n + '">' + n + "</span>" : "") +
+        '<button class="qty__add" type="button" data-act="open" data-id="' + item.id + '" aria-label="選擇' + esc(item.name) + '規格">+</button>';
+    }
+    var line = state.cart[item.id];
+    var q = line ? line.qty : 0;
     if (q === 0) {
       return '<button class="qty__add" type="button" data-act="add" data-id="' + item.id + '" aria-label="加入' + esc(item.name) + '">+</button>';
     }
+    return stepperHTML(item.id, q);
+  }
+  function stepperHTML(key, q) {
     return '<div class="qty__stepper">' +
-      '<button class="qty__btn" type="button" data-act="dec" data-id="' + item.id + '" aria-label="減少">−</button>' +
+      '<button class="qty__btn" type="button" data-act="dec" data-key="' + esc(key) + '" aria-label="減少">−</button>' +
       '<span class="qty__num" aria-live="polite">' + q + "</span>" +
-      '<button class="qty__btn" type="button" data-act="inc" data-id="' + item.id + '" aria-label="增加">+</button>' +
+      '<button class="qty__btn" type="button" data-act="inc" data-key="' + esc(key) + '" aria-label="增加">+</button>' +
       "</div>";
   }
   function itemHTML(item) {
-    var q = state.cart[item.id] || 0;
-    return '<article class="item' + (q > 0 ? " is-selected" : "") + '" data-item="' + item.id + '">' +
+    var selected = itemCount(item.id) > 0;
+    return '<article class="item' + (selected ? " is-selected" : "") + '" data-item="' + item.id + '">' +
       imgHTML(item) +
       '<div class="item__body">' +
         '<div class="item__name">' + esc(item.name) + (item.tag ? '<span class="item__tag">' + esc(item.tag) + "</span>" : "") + "</div>" +
@@ -87,30 +119,39 @@
       '<div class="qty">' + qtyHTML(item) + "</div>" +
       "</article>";
   }
+  // review row (one cart line)
+  function lineHTML(line) {
+    var item = ITEMS[line.id];
+    return '<article class="item is-selected" data-line="' + esc(line.key) + '">' +
+      imgHTML(item) +
+      '<div class="item__body">' +
+        '<div class="item__name">' + esc(item.name) + "</div>" +
+        (line.opts.length ? '<div class="item__opts">' + esc(optsText(line.opts, true)) + "</div>" : "") +
+        '<div class="item__price">' + money(lineUnit(line)) + "</div>" +
+      "</div>" +
+      '<div class="qty">' + stepperHTML(line.key, line.qty) + "</div>" +
+      "</article>";
+  }
   function renderQty(id) {
-    document.querySelectorAll('[data-item="' + id + '"]').forEach(function (el) {
-      el.classList.toggle("is-selected", (state.cart[id] || 0) > 0);
+    document.querySelectorAll('#viewMenu [data-item="' + id + '"]').forEach(function (el) {
+      el.classList.toggle("is-selected", itemCount(id) > 0);
       $(".qty", el).innerHTML = qtyHTML(ITEMS[id]);
     });
   }
 
   // ---------- render: menu ----------
   function renderMenu() {
-    var html = MENU.categories.map(function (c) {
+    $("#viewMenu").innerHTML = MENU.categories.map(function (c) {
       var items = MENU.items.filter(function (it) { return it.cat === c.id; });
       return '<section class="cat" id="cat-' + c.id + '">' +
         '<div class="cat__head"><h2>' + esc(c.name) + "</h2><span>" + esc(c.en) + "</span></div>" +
         '<div class="items">' + items.map(itemHTML).join("") + "</div>" +
         "</section>";
     }).join("");
-    $("#viewMenu").innerHTML = html;
-
     $("#catTabs").innerHTML = MENU.categories.map(function (c, i) {
       return '<a href="#cat-' + c.id + '" data-cat="' + c.id + '"' + (i === 0 ? ' class="is-active"' : "") + ">" + esc(c.name) + "</a>";
     }).join("");
   }
-
-  // active tab on scroll
   function setupTabObserver() {
     if (!("IntersectionObserver" in window)) return;
     var io = new IntersectionObserver(function (entries) {
@@ -131,7 +172,7 @@
   function renderReview() {
     var lines = cartLines();
     if (lines.length === 0 && state.step === 2) { goStep(1); toast("已清空餐點"); return; }
-    $("#reviewList").innerHTML = lines.map(function (l) { return itemHTML(l.item); }).join("");
+    $("#reviewList").innerHTML = lines.map(lineHTML).join("");
     $("#reviewTotal").textContent = money(cartTotal());
     $("#sheetHint").hidden = !!CONFIG.APPS_SCRIPT_URL;
   }
@@ -146,6 +187,65 @@
     $("#primaryTotal").textContent = money(cartTotal());
     $("#primaryLabel").textContent = state.step === 1 ? "下一步" : (state.submitting ? "送出中…" : "送出訂單");
     $("#primaryBtn").disabled = state.submitting;
+  }
+
+  // ---------- option sheet ----------
+  function openSheet(item) {
+    var picks = {};
+    item.options.forEach(function (g) { if (g.required && g.choices.length === 1) picks[g.name] = 0; });
+    state.sheet = { item: item, qty: 1, picks: picks };
+    $("#optName").textContent = item.name;
+    $("#optPrice").textContent = money(item.price);
+    $("#optImg").innerHTML = item.img ? '<img src="' + item.img + '" alt="" />' : "";
+    renderSheetGroups();
+    $("#optSheet").hidden = false;
+    document.body.classList.add("no-scroll");
+  }
+  function closeSheet() {
+    state.sheet = null;
+    $("#optSheet").hidden = true;
+    document.body.classList.remove("no-scroll");
+  }
+  function sheetUnit() {
+    var sh = state.sheet, extra = 0;
+    sh.item.options.forEach(function (g) {
+      var i = sh.picks[g.name];
+      if (i !== undefined && g.choices[i] && g.choices[i].extra) extra += g.choices[i].extra;
+    });
+    return sh.item.price + extra;
+  }
+  function renderSheetGroups() {
+    var sh = state.sheet;
+    $("#optGroups").innerHTML = sh.item.options.map(function (g, gi) {
+      return '<div class="ogroup" data-gi="' + gi + '">' +
+        '<div class="ogroup__name">' + esc(g.name) + (g.required ? '<span class="req">必選</span>' : '<span class="opt">可不選</span>') + "</div>" +
+        '<div class="chips">' + g.choices.map(function (c, ci) {
+          var on = sh.picks[g.name] === ci;
+          return '<button type="button" class="chip' + (on ? " is-on" : "") + '" data-gi="' + gi + '" data-ci="' + ci + '">' +
+            esc(c.label) + (c.extra ? "<small>+$" + c.extra + "</small>" : "") + "</button>";
+        }).join("") + "</div>" +
+      "</div>";
+    }).join("");
+    $("#optQty").textContent = sh.qty;
+    $("#optTotal").textContent = money(sheetUnit() * sh.qty);
+  }
+  function confirmSheet() {
+    var sh = state.sheet, missing = [];
+    sh.item.options.forEach(function (g, gi) {
+      var el = $('#optGroups .ogroup[data-gi="' + gi + '"]');
+      var miss = g.required && sh.picks[g.name] === undefined;
+      el.classList.toggle("is-missing", miss);
+      if (miss) missing.push(el);
+    });
+    if (missing.length) { missing[0].scrollIntoView({ behavior: "smooth", block: "center" }); toast("請先選擇必選項目"); return; }
+    var opts = [];
+    sh.item.options.forEach(function (g) {
+      var i = sh.picks[g.name];
+      if (i !== undefined) opts.push({ group: g.name, label: g.choices[i].label, extra: g.choices[i].extra || 0 });
+    });
+    addLine(sh.item.id, sh.qty, opts);
+    toast("已加入 " + sh.item.name + " × " + sh.qty);
+    closeSheet();
   }
 
   // ---------- steps ----------
@@ -176,12 +276,21 @@
     input.classList.remove("is-invalid");
     $("#familyError").hidden = true;
 
-    var lines = cartLines();
     var now = new Date();
     var order = {
       orderId: fmtDate(now, "id"),
       family: family,
-      items: lines.map(function (l) { return { id: l.item.id, name: l.item.name, price: l.item.price, qty: l.qty }; }),
+      items: cartLines().map(function (l) {
+        var it = ITEMS[l.id];
+        return {
+          id: l.id,
+          name: it.name + (l.opts.length ? "（" + optsText(l.opts, false).replace(/ · /g, "／") + "）" : ""),
+          baseName: it.name,
+          options: optsText(l.opts, true),
+          price: lineUnit(l),
+          qty: l.qty,
+        };
+      }),
       total: cartTotal(),
       time: now.toISOString(),
     };
@@ -190,20 +299,15 @@
     renderBottomBar();
 
     var save = CONFIG.APPS_SCRIPT_URL ? postToSheet(order) : Promise.resolve({ ok: false, skipped: true });
-
-    save.then(function (res) {
-      finish(order, res);
-    }).catch(function (err) {
-      finish(order, { ok: false, error: String(err) });
-    });
+    save.then(function (res) { finish(order, res); }).catch(function (err) { finish(order, { ok: false, error: String(err) }); });
   }
 
   function postToSheet(order) {
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000); // Apps Script 冷啟動可能較慢
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
     return fetch(CONFIG.APPS_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" }, // 避免 CORS 預檢
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(order),
       redirect: "follow",
       signal: ctrl ? ctrl.signal : undefined,
@@ -219,7 +323,6 @@
     else if (res.skipped) { warn.textContent = "⚠️ 尚未連接試算表，僅產生小卡"; warn.hidden = false; }
     else { warn.textContent = "⚠️ 寫入試算表失敗，請下載小卡保存並告知管理者（" + (res.error || "unknown") + "）"; warn.hidden = false; }
 
-    // 本機備份
     try {
       var log = JSON.parse(localStorage.getItem("orders") || "[]");
       log.push(Object.assign({ saved: !!res.ok }, order));
@@ -235,7 +338,7 @@
     });
 
     state.cart = {};
-    try { localStorage.removeItem("cart"); } catch (e) { /* ignore */ }
+    persist();
     goStep(3);
   }
 
@@ -262,9 +365,9 @@
     return Promise.all([ready, loadOcean()]).then(function (res) {
       var ocean = res[1];
       var W = 1080, pad = 84;
-      var lineH = 78;
       var heroH = 520;
-      var listH = order.items.length * lineH;
+      var rowH = function (it) { return it.options ? 110 : 78; };
+      var listH = order.items.reduce(function (s, it) { return s + rowH(it); }, 0);
       var H = heroH + 150 + listH + 230;
       var canvas = $("#cardCanvas");
       canvas.width = W; canvas.height = H;
@@ -272,7 +375,6 @@
       var sans = '"Jost", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
       var INK = "#151515", MUTED = "#8a8f94", LINE = "#ececec", SEA = "#17a6cc";
 
-      // hero: ocean photo
       ctx.fillStyle = "#17a6cc"; ctx.fillRect(0, 0, W, heroH + 60);
       if (ocean) {
         var sc = Math.max(W / ocean.width, (heroH + 60) / ocean.height);
@@ -289,7 +391,6 @@
       ctx.fillStyle = "#ffffff"; ctx.font = "300 " + fitFont(ctx, order.family, W - pad * 2, 110, 56, sans, "300") + "px " + sans;
       ctx.fillText(order.family, pad - 4, 300);
 
-      // white sheet with rounded top corners
       var top = heroH;
       ctx.fillStyle = "#ffffff";
       ctx.beginPath(); ctx.moveTo(0, top + 44); ctx.arcTo(0, top, 44, top, 44); ctx.lineTo(W - 44, top); ctx.arcTo(W, top, W, top + 44, 44); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
@@ -297,30 +398,33 @@
       ctx.fillStyle = INK; ctx.font = "400 30px " + sans; ctx.letterSpacing = "2px";
       ctx.fillText("餐點明細", pad, top + 96);
       ctx.letterSpacing = "0px";
-      // wavy underline
       drawWave(ctx, pad, top + 112, 120, SEA);
 
       ctx.textBaseline = "middle";
-      var yy = top + 150 + lineH / 2;
+      var y = top + 150;
       order.items.forEach(function (it, i) {
-        if (i > 0) { ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, yy - lineH / 2); ctx.lineTo(W - pad, yy - lineH / 2); ctx.stroke(); }
+        var h = rowH(it);
+        if (i > 0) { ctx.strokeStyle = LINE; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke(); }
+        var cy = y + (it.options ? 40 : h / 2);
         ctx.textAlign = "left"; ctx.fillStyle = INK; ctx.font = "400 34px " + sans;
-        ctx.fillText(truncate(ctx, it.name, W - pad * 2 - 300), pad, yy);
+        ctx.fillText(truncate(ctx, it.baseName || it.name, W - pad * 2 - 300), pad, cy);
+        if (it.options) {
+          ctx.fillStyle = SEA; ctx.font = "300 24px " + sans;
+          ctx.fillText(truncate(ctx, it.options, W - pad * 2 - 300), pad, cy + 40);
+        }
         ctx.textAlign = "center"; ctx.fillStyle = INK; ctx.font = "300 34px " + sans;
-        ctx.fillText("×" + it.qty, W - pad - 190, yy);
+        ctx.fillText("×" + it.qty, W - pad - 190, cy);
         ctx.textAlign = "right"; ctx.fillStyle = MUTED; ctx.font = "300 30px " + sans;
-        ctx.fillText(money(it.price * it.qty), W - pad, yy);
-        yy += lineH;
+        ctx.fillText(money(it.price * it.qty), W - pad, cy);
+        y += h;
       });
 
-      // total
       var ty = top + 150 + listH + 70;
       ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, ty - 50); ctx.lineTo(W - pad, ty - 50); ctx.stroke();
       ctx.textAlign = "left"; ctx.fillStyle = MUTED; ctx.font = "300 28px " + sans;
       ctx.fillText("共 " + order.items.reduce(function (s, i) { return s + i.qty; }, 0) + " 項", pad, ty + 8);
       ctx.textAlign = "right"; ctx.fillStyle = INK; ctx.font = "300 60px " + sans; ctx.fillText(money(order.total), W - pad, ty + 8);
 
-      // footer
       ctx.textAlign = "center"; ctx.fillStyle = MUTED; ctx.font = "300 22px " + sans; ctx.letterSpacing = "4px";
       ctx.fillText(CONFIG.CARD_FOOTER || MENU.store, W / 2, H - 56);
       ctx.letterSpacing = "0px";
@@ -333,11 +437,6 @@
     ctx.beginPath(); ctx.moveTo(x, y);
     for (var i = 0; i <= w; i += 2) ctx.lineTo(x + i, y + Math.sin(i / 6) * 4);
     ctx.stroke();
-  }
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
   function fitFont(ctx, text, maxW, start, min, family, weight) {
     weight = weight || "900";
@@ -354,10 +453,30 @@
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-act]");
     if (!btn) return;
-    var id = btn.dataset.id, q = state.cart[id] || 0;
-    if (btn.dataset.act === "add" || btn.dataset.act === "inc") setQty(id, q + 1);
-    if (btn.dataset.act === "dec") setQty(id, q - 1);
+    var act = btn.dataset.act;
+    if (act === "open") { openSheet(ITEMS[btn.dataset.id]); return; }
+    if (act === "add") { addLine(btn.dataset.id, 1, []); return; }
+    var key = btn.dataset.key, line = state.cart[key];
+    if (!line) return;
+    if (act === "inc") setLineQty(key, line.qty + 1);
+    if (act === "dec") setLineQty(key, line.qty - 1);
   });
+  $("#optSheet").addEventListener("click", function (e) {
+    if (e.target.closest("[data-close]")) { closeSheet(); return; }
+    var chip = e.target.closest(".chip");
+    if (chip) {
+      var g = state.sheet.item.options[+chip.dataset.gi], ci = +chip.dataset.ci;
+      var cur = state.sheet.picks[g.name];
+      if (cur === ci && !g.required) delete state.sheet.picks[g.name]; // optional: tap again to clear
+      else state.sheet.picks[g.name] = ci;
+      renderSheetGroups();
+      return;
+    }
+    var oq = e.target.closest("[data-oq]");
+    if (oq) { state.sheet.qty = Math.max(1, Math.min(99, state.sheet.qty + (+oq.dataset.oq))); renderSheetGroups(); return; }
+    if (e.target.closest("#optAdd")) confirmSheet();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && state.sheet) closeSheet(); });
   $("#catTabs").addEventListener("click", function (e) {
     var a = e.target.closest("a"); if (!a) return;
     e.preventDefault();

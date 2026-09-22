@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=202609221604" />
+  <link rel="stylesheet" href="css/style.css?v=202609221922" />
 </head>
 <body>
   <header class="hero" id="hero">
@@ -73,10 +73,36 @@
     </button>
   </footer>
 
+  <!-- 規格選擇彈窗 -->
+  <div class="osheet" id="optSheet" hidden>
+    <div class="osheet__mask" data-close="1"></div>
+    <div class="osheet__panel" role="dialog" aria-modal="true" aria-labelledby="optName">
+      <div class="osheet__head">
+        <div class="osheet__title">
+          <h3 id="optName"></h3>
+          <span class="osheet__price" id="optPrice"></span>
+        </div>
+        <button class="osheet__close" type="button" data-close="1" aria-label="關閉">×</button>
+      </div>
+      <div class="osheet__body">
+        <div class="osheet__img" id="optImg"></div>
+        <div class="osheet__groups" id="optGroups"></div>
+      </div>
+      <div class="osheet__foot">
+        <div class="osheet__qty">
+          <button class="qty__btn" type="button" data-oq="-1" aria-label="減少">−</button>
+          <span class="qty__num" id="optQty">1</span>
+          <button class="qty__btn" type="button" data-oq="1" aria-label="增加">+</button>
+        </div>
+        <button class="osheet__add" type="button" id="optAdd">加入 <span id="optTotal"></span></button>
+      </div>
+    </div>
+  </div>
+
   <canvas id="cardCanvas" hidden></canvas>
 
-  <script src="js/config.js?v=202609221604"></script>
-  <script src="js/menu.js?v=202609221604"></script>
-  <script src="js/app.js?v=202609221604"></script>
+  <script src="js/config.js?v=202609221922"></script>
+  <script src="js/menu.js?v=202609221922"></script>
+  <script src="js/app.js?v=202609221922"></script>
 </body>
 </html>
