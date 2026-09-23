@@ -213,7 +213,7 @@
     document.body.classList.remove("no-scroll");
   }
   function backToParent() {
-    if (state.sheet && state.sheet.parent) { state.sheet = state.sheet.parent; renderSheet(); $(".osheet__body").scrollTop = 0; }
+    if (state.sheet && state.sheet.parent) { state.sheet = state.sheet.parent; renderSheet(); $(".osheet__body").scrollTop = state.sheet.scrollTop || 0; }
     else closeSheet();
   }
   function optsExtra(sh) {
@@ -311,6 +311,7 @@
       parent.drink = { id: sh.item.id, opts: opts, extra: setDrinkAddon(sh.item.id) + optsExtra(sh) };
       state.sheet = parent;
       renderSheet();
+      $(".osheet__body").scrollTop = parent.scrollTop || 0; // 回到離開時的捲動位置
       return;
     }
     if (sh.drink) {
@@ -555,7 +556,7 @@
     var dm = e.target.closest("[data-dm]");
     if (dm) { sh.drinkMode = dm.dataset.dm; if (sh.drinkMode === "none") sh.drink = null; renderSheet(); return; }
     var row = e.target.closest("[data-drink]");
-    if (row) { openSheet(ITEMS[row.dataset.drink], sh); $(".osheet__body").scrollTop = 0; return; }
+    if (row) { sh.scrollTop = $(".osheet__body").scrollTop; openSheet(ITEMS[row.dataset.drink], sh); $(".osheet__body").scrollTop = 0; return; }
     var chip = e.target.closest(".chip");
     if (chip && chip.dataset.gi !== undefined) {
       var g = sh.item.options[+chip.dataset.gi], ci = +chip.dataset.ci;
