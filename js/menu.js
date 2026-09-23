@@ -18,7 +18,7 @@ var ICE_ALL = ["去冰", "少冰", "正常冰", "熱"];
 window.MENU = {
   store: "喬咖館",
   // 套餐加購飲品：可加購的分類、加購價 = 單點價 − 折抵、排除品項（取自 didieats 套餐選項）
-  setDrink: { cats: ["coffee", "tea", "other"], discount: 40, exclude: ["ot-mango"] },
+  setDrink: { cats: ["coffee", "tea", "other"], discount: 40, exclude: [] },
   categories: [
     { id: "set", name: "精緻套餐", en: "SET MEALS", emoji: "🍽️" },
     { id: "pizza", name: "披薩", en: "PIZZA", emoji: "🍕" },
@@ -86,7 +86,6 @@ window.MENU = {
     { id: "ot-juice", cat: "other", name: "季節現打高纖蔬果汁", en: "Seasonal Fresh Juice", price: 250, options: [SUGAR(["微糖", "無糖"]), TOPPING([{ label: "巧克力冰淇淋", extra: 100 }, { label: "草莓冰淇淋", extra: 100 }]), LATER] },
     { id: "ot-sparkling", cat: "other", name: "綜合水果氣泡飲", en: "Fruit Sparkling Drink", price: 220, options: [ICE(["去冰", "少冰", "正常冰"]), SUGAR(["正常糖", "半糖"]), LATER] },
     { id: "ot-beer", cat: "other", name: "季節水果啤酒", en: "Seasonal Fruit Beer", price: 250, options: [SUGAR(["正常糖", "半糖"]), LATER] },
-    { id: "ot-mango", cat: "other", name: "新鮮芒果冰", en: "Fresh Mango Ice", price: 220, tag: "季節限定", img: "img/mango-ice.jpg", options: [TOPPING([{ label: "草莓冰淇淋", extra: 100 }, { label: "香草冰淇淋", extra: 100 }, PEARL]), LATER] },
     { id: "ot-fruit-smoothie", cat: "other", name: "冰淇淋水果冰沙", en: "Fruit Smoothie with Ice Cream", price: 260, options: [SUGAR(["正常糖", "半糖"]), TOP_PEARL, LATER] },
     { id: "ot-choco-smoothie", cat: "other", name: "冰淇淋巧克力冰沙", en: "Chocolate Smoothie with Ice Cream", price: 260, img: "img/choco-smoothie.jpg", options: [SUGAR(["正常糖", "半糖"]), TOP_PEARL, LATER] },
   ],
