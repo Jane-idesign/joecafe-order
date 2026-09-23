@@ -71,10 +71,10 @@ window.MENU = {
 
     // 茶
     { id: "tea-fruit", cat: "tea", name: "夏日鮮果茶", en: "Summer Fruit Tea", price: 240, img: "img/fruit-tea.jpg", options: [ICE(["去冰", "正常冰", "熱"]), LATER] },
-    { id: "tea-longan", cat: "tea", name: "桂圓枸杞紅棗茶", en: "Longan, Goji & Red Date Tea", price: 250, tag: "熱壺", img: "img/longan-tea.jpg", options: [TOP_PEARL, LATER] },
-    { id: "tea-ginger", cat: "tea", name: "枸杞薑絲紅棗茶", en: "Goji, Ginger & Red Date Tea", price: 250, tag: "熱壺", img: "img/goji-ginger-tea.jpg", options: [TOP_PEARL, LATER] },
-    { id: "tea-oolong", cat: "tea", name: "高山烏龍茶", en: "High Mountain Oolong Tea", price: 220, tag: "熱壺", options: [TOP_PEARL, LATER] },
-    { id: "tea-flower", cat: "tea", name: "雲間子花茶", en: "Mystery Flower Tea", price: 200, tag: "熱壺", options: [TOP_PEARL, LATER] },
+    { id: "tea-longan", cat: "tea", name: "桂圓枸杞紅棗茶（熱壺）", en: "Longan, Goji & Red Date Tea", price: 250, img: "img/longan-tea.jpg", options: [TOP_PEARL, LATER] },
+    { id: "tea-ginger", cat: "tea", name: "枸杞薑絲紅棗茶（熱壺）", en: "Goji, Ginger & Red Date Tea", price: 250, img: "img/goji-ginger-tea.jpg", options: [TOP_PEARL, LATER] },
+    { id: "tea-oolong", cat: "tea", name: "高山烏龍茶（熱壺）", en: "High Mountain Oolong Tea", price: 220, options: [TOP_PEARL, LATER] },
+    { id: "tea-flower", cat: "tea", name: "雲間子花茶（熱壺）", en: "Mystery Flower Tea", price: 200, options: [TOP_PEARL, LATER] },
     { id: "tea-black", cat: "tea", name: "招牌紅茶", en: "Signature Black Tea", price: 200, img: "img/black-tea.jpg", options: [ICE(ICE_ALL), SUGAR(["正常糖", "微糖", "無糖"]), TOP4, LATER] },
     { id: "tea-bubble", cat: "tea", name: "黑糖珍珠鮮奶茶", en: "Brown Sugar Bubble Milk Tea", price: 250, options: [ICE(ICE_ALL), SUGAR(["正常糖", "半糖"]), TOP3, CUSTOM([BIGCUP]), LATER] },
     { id: "tea-matcha", cat: "tea", name: "抹茶珍珠鮮奶茶", en: "Matcha Bubble Milk Tea", price: 250, options: [ICE(ICE_ALL), SUGAR(["正常糖", "半糖", "無糖"]), TOP3, CUSTOM([BIGCUP]), LATER] },
